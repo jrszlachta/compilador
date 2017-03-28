@@ -1,6 +1,6 @@
 
-// Testar se funciona corretamente o empilhamento de parâmetros
-// passados por valor ou por referência.
+// Testar se funciona corretamente o empilhamento de parâmetros
+// passados por valor ou por referência.
 
 
 %{
@@ -65,8 +65,8 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
-              { /* insere última vars na tabela de símbolos */ }
-            | IDENT { /* insere vars na tabela de símbolos */}
+              { /* insere última vars na tabela de símbolos */ }
+            | IDENT { /* insere vars na tabela de símbolos */}
 ;
 
 lista_idents: lista_idents VIRGULA IDENT  
@@ -82,7 +82,7 @@ comandos:
 
 %%
 
-int yylex ();
+
 main (int argc, char** argv) {
    FILE* fp;
    extern FILE* yyin;
@@ -100,7 +100,7 @@ main (int argc, char** argv) {
 
 
 /* -------------------------------------------------------------------
- *  Inicia a Tabela de Símbolos
+ *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
 
    yyin=fp;

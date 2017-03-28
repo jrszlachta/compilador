@@ -39,4 +39,4 @@ char token[TAM_TOKEN];
 
 int yylex ();
 void yyerror(const char *s);
-void geraCodigo (char *rot, char *comando);
+

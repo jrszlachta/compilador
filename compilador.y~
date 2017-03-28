@@ -82,7 +82,6 @@ comandos:
 
 %%
 
-int yylex ();
 main (int argc, char** argv) {
    FILE* fp;
    extern FILE* yyin;
