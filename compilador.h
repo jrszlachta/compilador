@@ -37,6 +37,9 @@ simbolos simbolo, relacao;
 char token[TAM_TOKEN];
 
 
-int yylex ();
+int yylex();
 void yyerror(const char *s);
-void geraCodigo (char *rot, char *comando);
+void geraCodigo (char* rot, char* comando, int* arg1, int* arg2);
+int imprimeErro(char* erro);
+void atualizaTS(int num, char token[TAM_TOKEN]);
+char *intToStr(int n);

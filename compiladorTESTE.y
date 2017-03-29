@@ -10,7 +10,7 @@
 #include <string.h>
 #include "compilador.h"
 
-int num_vars, contVar;
+int num_vars;
 
 %}
 
@@ -21,12 +21,12 @@ int num_vars, contVar;
 %%
 
 programa    :{ 
-             geraCodigo (NULL, "INPP", NULL, NULL); 
+             geraCodigo (NULL, "INPP"); 
              }
              PROGRAM IDENT 
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-             geraCodigo (NULL, "PARA", NULL, NULL); 
+             geraCodigo (NULL, "PARA"); 
              }
 ;
 
@@ -42,7 +42,6 @@ bloco       :
 
 
 parte_declara_vars:  var 
-                  |  parte_declara_vars var
 ;
 
 
@@ -54,13 +53,11 @@ declara_vars: declara_vars declara_var
             | declara_var 
 ;
 
-declara_var : {contVar = 0} 
+declara_var : { } 
               lista_id_var DOIS_PONTOS 
               tipo 
-              {
-                geraCodigo (NULL, "AMEM", &contVar, NULL); 
-                atualizaTS(contVar, token);
-              } 
+              { /* AMEM */
+              }
               PONTO_E_VIRGULA
 ;
 
@@ -68,8 +65,8 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
-              { contVar++ /* insere última vars na tabela de símbolos */ }
-            | IDENT { contVar++ /* insere vars na tabela de símbolos */}
+              { /* insere última vars na tabela de símbolos */ }
+            | IDENT { /* insere vars na tabela de símbolos */}
 ;
 
 lista_idents: lista_idents VIRGULA IDENT  
