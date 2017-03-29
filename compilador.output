@@ -54,11 +54,21 @@ Grammar
    24 comando: comando_sem_rotulo
    25        | IDENT DOIS_PONTOS comando_sem_rotulo
 
-   26 comando_sem_rotulo: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
-   27                   | IF expressao THEN comando_sem_rotulo
-   28                   | WHILE expressao DO comando_sem_rotulo
+   26 comando_sem_rotulo: regra_atribuicao
+   27                   | regra_condicional
+   28                   | regra_while
 
-   29 expressao: IDENT IGUAL IDENT
+   29 regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
+
+   30 @7: /* empty */
+
+   31 regra_condicional: IF expressao THEN @7 comando_sem_rotulo
+
+   32 @8: /* empty */
+
+   33 regra_while: WHILE @8 expressao DO comando_sem_rotulo
+
+   34 expressao: IDENT IGUAL IDENT
 
 
 Terminals, with rules where they appear
@@ -69,20 +79,20 @@ PROGRAM (258) 2
 ABRE_PARENTESES (259) 2
 FECHA_PARENTESES (260) 2
 VIRGULA (261) 17 19
-PONTO_E_VIRGULA (262) 2 15 26
+PONTO_E_VIRGULA (262) 2 15 29
 DOIS_PONTOS (263) 15 25
 PONTO (264) 2
 T_BEGIN (265) 21
 T_END (266) 21
 VAR (267) 9
-IDENT (268) 2 16 17 18 19 20 25 26 29
-ATRIBUICAO (269) 26
-WHILE (270) 28
-DO (271) 28
-IF (272) 27
-THEN (273) 27
+IDENT (268) 2 16 17 18 19 20 25 29 34
+ATRIBUICAO (269) 29
+WHILE (270) 33
+DO (271) 33
+IF (272) 31
+THEN (273) 31
 ELSE (274)
-IGUAL (275) 29
+IGUAL (275) 34
 
 
 Nonterminals, with rules where they appear
@@ -126,9 +136,19 @@ comandos (38)
 comando (39)
     on left: 24 25, on right: 22 23
 comando_sem_rotulo (40)
-    on left: 26 27 28, on right: 24 25 27 28
-expressao (41)
-    on left: 29, on right: 27 28
+    on left: 26 27 28, on right: 24 25 31 33
+regra_atribuicao (41)
+    on left: 29, on right: 26
+regra_condicional (42)
+    on left: 31, on right: 27
+@7 (43)
+    on left: 30, on right: 31
+regra_while (44)
+    on left: 33, on right: 28
+@8 (45)
+    on left: 32, on right: 33
+expressao (46)
+    on left: 34, on right: 31 33
 
 
 state 0
@@ -328,6 +348,9 @@ state 22
     comandos            go to state 30
     comando             go to state 31
     comando_sem_rotulo  go to state 32
+    regra_atribuicao    go to state 33
+    regra_condicional   go to state 34
+    regra_while         go to state 35
 
 
 state 23
@@ -345,7 +368,7 @@ state 24
     IDENT     reduce using rule 13 (@5)
     $default  reduce using rule 9 (var)
 
-    declara_var  go to state 33
+    declara_var  go to state 36
     @5           go to state 26
 
 
@@ -360,36 +383,36 @@ state 26
 
    15 declara_var: @5 . lista_id_var DOIS_PONTOS tipo @6 PONTO_E_VIRGULA
 
-    IDENT  shift, and go to state 34
+    IDENT  shift, and go to state 37
 
-    lista_id_var  go to state 35
+    lista_id_var  go to state 38
 
 
 state 27
 
    25 comando: IDENT . DOIS_PONTOS comando_sem_rotulo
-   26 comando_sem_rotulo: IDENT . ATRIBUICAO IDENT PONTO_E_VIRGULA
+   29 regra_atribuicao: IDENT . ATRIBUICAO IDENT PONTO_E_VIRGULA
 
-    DOIS_PONTOS  shift, and go to state 36
-    ATRIBUICAO   shift, and go to state 37
+    DOIS_PONTOS  shift, and go to state 39
+    ATRIBUICAO   shift, and go to state 40
 
 
 state 28
 
-   28 comando_sem_rotulo: WHILE . expressao DO comando_sem_rotulo
+   33 regra_while: WHILE . @8 expressao DO comando_sem_rotulo
 
-    IDENT  shift, and go to state 38
+    $default  reduce using rule 32 (@8)
 
-    expressao  go to state 39
+    @8  go to state 41
 
 
 state 29
 
-   27 comando_sem_rotulo: IF . expressao THEN comando_sem_rotulo
+   31 regra_condicional: IF . expressao THEN @7 comando_sem_rotulo
 
-    IDENT  shift, and go to state 38
+    IDENT  shift, and go to state 42
 
-    expressao  go to state 40
+    expressao  go to state 43
 
 
 state 30
@@ -397,13 +420,16 @@ state 30
    21 comando_composto: T_BEGIN comandos . T_END
    23 comandos: comandos . comando
 
-    T_END  shift, and go to state 41
+    T_END  shift, and go to state 44
     IDENT  shift, and go to state 27
     WHILE  shift, and go to state 28
     IF     shift, and go to state 29
 
-    comando             go to state 42
+    comando             go to state 45
     comando_sem_rotulo  go to state 32
+    regra_atribuicao    go to state 33
+    regra_condicional   go to state 34
+    regra_while         go to state 35
 
 
 state 31
@@ -422,205 +448,253 @@ state 32
 
 state 33
 
+   26 comando_sem_rotulo: regra_atribuicao .
+
+    $default  reduce using rule 26 (comando_sem_rotulo)
+
+
+state 34
+
+   27 comando_sem_rotulo: regra_condicional .
+
+    $default  reduce using rule 27 (comando_sem_rotulo)
+
+
+state 35
+
+   28 comando_sem_rotulo: regra_while .
+
+    $default  reduce using rule 28 (comando_sem_rotulo)
+
+
+state 36
+
    11 declara_vars: declara_vars declara_var .
 
     $default  reduce using rule 11 (declara_vars)
 
 
-state 34
+state 37
 
    18 lista_id_var: IDENT .
 
     $default  reduce using rule 18 (lista_id_var)
 
 
-state 35
+state 38
 
    15 declara_var: @5 lista_id_var . DOIS_PONTOS tipo @6 PONTO_E_VIRGULA
    17 lista_id_var: lista_id_var . VIRGULA IDENT
 
-    VIRGULA      shift, and go to state 43
-    DOIS_PONTOS  shift, and go to state 44
-
-
-state 36
-
-   25 comando: IDENT DOIS_PONTOS . comando_sem_rotulo
-
-    IDENT  shift, and go to state 45
-    WHILE  shift, and go to state 28
-    IF     shift, and go to state 29
-
-    comando_sem_rotulo  go to state 46
-
-
-state 37
-
-   26 comando_sem_rotulo: IDENT ATRIBUICAO . IDENT PONTO_E_VIRGULA
-
-    IDENT  shift, and go to state 47
-
-
-state 38
-
-   29 expressao: IDENT . IGUAL IDENT
-
-    IGUAL  shift, and go to state 48
+    VIRGULA      shift, and go to state 46
+    DOIS_PONTOS  shift, and go to state 47
 
 
 state 39
 
-   28 comando_sem_rotulo: WHILE expressao . DO comando_sem_rotulo
+   25 comando: IDENT DOIS_PONTOS . comando_sem_rotulo
 
-    DO  shift, and go to state 49
+    IDENT  shift, and go to state 48
+    WHILE  shift, and go to state 28
+    IF     shift, and go to state 29
+
+    comando_sem_rotulo  go to state 49
+    regra_atribuicao    go to state 33
+    regra_condicional   go to state 34
+    regra_while         go to state 35
 
 
 state 40
 
-   27 comando_sem_rotulo: IF expressao . THEN comando_sem_rotulo
+   29 regra_atribuicao: IDENT ATRIBUICAO . IDENT PONTO_E_VIRGULA
 
-    THEN  shift, and go to state 50
+    IDENT  shift, and go to state 50
 
 
 state 41
+
+   33 regra_while: WHILE @8 . expressao DO comando_sem_rotulo
+
+    IDENT  shift, and go to state 42
+
+    expressao  go to state 51
+
+
+state 42
+
+   34 expressao: IDENT . IGUAL IDENT
+
+    IGUAL  shift, and go to state 52
+
+
+state 43
+
+   31 regra_condicional: IF expressao . THEN @7 comando_sem_rotulo
+
+    THEN  shift, and go to state 53
+
+
+state 44
 
    21 comando_composto: T_BEGIN comandos T_END .
 
     $default  reduce using rule 21 (comando_composto)
 
 
-state 42
+state 45
 
    23 comandos: comandos comando .
 
     $default  reduce using rule 23 (comandos)
 
 
-state 43
+state 46
 
    17 lista_id_var: lista_id_var VIRGULA . IDENT
 
-    IDENT  shift, and go to state 51
+    IDENT  shift, and go to state 54
 
 
-state 44
+state 47
 
    15 declara_var: @5 lista_id_var DOIS_PONTOS . tipo @6 PONTO_E_VIRGULA
 
-    IDENT  shift, and go to state 52
+    IDENT  shift, and go to state 55
 
-    tipo  go to state 53
-
-
-state 45
-
-   26 comando_sem_rotulo: IDENT . ATRIBUICAO IDENT PONTO_E_VIRGULA
-
-    ATRIBUICAO  shift, and go to state 37
+    tipo  go to state 56
 
 
-state 46
+state 48
+
+   29 regra_atribuicao: IDENT . ATRIBUICAO IDENT PONTO_E_VIRGULA
+
+    ATRIBUICAO  shift, and go to state 40
+
+
+state 49
 
    25 comando: IDENT DOIS_PONTOS comando_sem_rotulo .
 
     $default  reduce using rule 25 (comando)
 
 
-state 47
-
-   26 comando_sem_rotulo: IDENT ATRIBUICAO IDENT . PONTO_E_VIRGULA
-
-    PONTO_E_VIRGULA  shift, and go to state 54
-
-
-state 48
-
-   29 expressao: IDENT IGUAL . IDENT
-
-    IDENT  shift, and go to state 55
-
-
-state 49
-
-   28 comando_sem_rotulo: WHILE expressao DO . comando_sem_rotulo
-
-    IDENT  shift, and go to state 45
-    WHILE  shift, and go to state 28
-    IF     shift, and go to state 29
-
-    comando_sem_rotulo  go to state 56
-
-
 state 50
 
-   27 comando_sem_rotulo: IF expressao THEN . comando_sem_rotulo
+   29 regra_atribuicao: IDENT ATRIBUICAO IDENT . PONTO_E_VIRGULA
 
-    IDENT  shift, and go to state 45
-    WHILE  shift, and go to state 28
-    IF     shift, and go to state 29
-
-    comando_sem_rotulo  go to state 57
+    PONTO_E_VIRGULA  shift, and go to state 57
 
 
 state 51
+
+   33 regra_while: WHILE @8 expressao . DO comando_sem_rotulo
+
+    DO  shift, and go to state 58
+
+
+state 52
+
+   34 expressao: IDENT IGUAL . IDENT
+
+    IDENT  shift, and go to state 59
+
+
+state 53
+
+   31 regra_condicional: IF expressao THEN . @7 comando_sem_rotulo
+
+    $default  reduce using rule 30 (@7)
+
+    @7  go to state 60
+
+
+state 54
 
    17 lista_id_var: lista_id_var VIRGULA IDENT .
 
     $default  reduce using rule 17 (lista_id_var)
 
 
-state 52
+state 55
 
    16 tipo: IDENT .
 
     $default  reduce using rule 16 (tipo)
 
 
-state 53
+state 56
 
    15 declara_var: @5 lista_id_var DOIS_PONTOS tipo . @6 PONTO_E_VIRGULA
 
     $default  reduce using rule 14 (@6)
 
-    @6  go to state 58
-
-
-state 54
-
-   26 comando_sem_rotulo: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA .
-
-    $default  reduce using rule 26 (comando_sem_rotulo)
-
-
-state 55
-
-   29 expressao: IDENT IGUAL IDENT .
-
-    $default  reduce using rule 29 (expressao)
-
-
-state 56
-
-   28 comando_sem_rotulo: WHILE expressao DO comando_sem_rotulo .
-
-    $default  reduce using rule 28 (comando_sem_rotulo)
+    @6  go to state 61
 
 
 state 57
 
-   27 comando_sem_rotulo: IF expressao THEN comando_sem_rotulo .
+   29 regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA .
 
-    $default  reduce using rule 27 (comando_sem_rotulo)
+    $default  reduce using rule 29 (regra_atribuicao)
 
 
 state 58
 
-   15 declara_var: @5 lista_id_var DOIS_PONTOS tipo @6 . PONTO_E_VIRGULA
+   33 regra_while: WHILE @8 expressao DO . comando_sem_rotulo
 
-    PONTO_E_VIRGULA  shift, and go to state 59
+    IDENT  shift, and go to state 48
+    WHILE  shift, and go to state 28
+    IF     shift, and go to state 29
+
+    comando_sem_rotulo  go to state 62
+    regra_atribuicao    go to state 33
+    regra_condicional   go to state 34
+    regra_while         go to state 35
 
 
 state 59
+
+   34 expressao: IDENT IGUAL IDENT .
+
+    $default  reduce using rule 34 (expressao)
+
+
+state 60
+
+   31 regra_condicional: IF expressao THEN @7 . comando_sem_rotulo
+
+    IDENT  shift, and go to state 48
+    WHILE  shift, and go to state 28
+    IF     shift, and go to state 29
+
+    comando_sem_rotulo  go to state 63
+    regra_atribuicao    go to state 33
+    regra_condicional   go to state 34
+    regra_while         go to state 35
+
+
+state 61
+
+   15 declara_var: @5 lista_id_var DOIS_PONTOS tipo @6 . PONTO_E_VIRGULA
+
+    PONTO_E_VIRGULA  shift, and go to state 64
+
+
+state 62
+
+   33 regra_while: WHILE @8 expressao DO comando_sem_rotulo .
+
+    $default  reduce using rule 33 (regra_while)
+
+
+state 63
+
+   31 regra_condicional: IF expressao THEN @7 comando_sem_rotulo .
+
+    $default  reduce using rule 31 (regra_condicional)
+
+
+state 64
 
    15 declara_var: @5 lista_id_var DOIS_PONTOS tipo @6 PONTO_E_VIRGULA .
 

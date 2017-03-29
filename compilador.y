@@ -92,9 +92,21 @@ comando: comando_sem_rotulo
       |  IDENT DOIS_PONTOS comando_sem_rotulo
 ;
 
-comando_sem_rotulo:  IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
-                  |  IF expressao THEN comando_sem_rotulo
-                  |  WHILE expressao DO comando_sem_rotulo
+comando_sem_rotulo:  regra_atribuicao
+                  |  regra_condicional
+                  |  regra_while
+;
+
+regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
+;
+
+regra_condicional: IF expressao THEN {printf("*");} comando_sem_rotulo
+;
+
+regra_while: WHILE 
+    { //gera
+    } 
+expressao DO comando_sem_rotulo
 ;
 
 expressao: IDENT IGUAL IDENT 
