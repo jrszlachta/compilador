@@ -18,6 +18,8 @@ typedef enum simbolos {
   simb_identificador, simb_numero,
   simb_ponto, simb_virgula, simb_ponto_e_virgula, simb_dois_pontos,
   simb_atribuicao, simb_abre_parenteses, simb_fecha_parenteses,
+  simb_while, simb_do, simb_if, simb_then, simb_else, 
+  simb_igual,
 } simbolos;
 
 
@@ -39,7 +41,7 @@ char token[TAM_TOKEN];
 
 int yylex();
 void yyerror(const char *s);
-void geraCodigo (char* rot, char* comando, int* arg1, int* arg2);
+void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3);
 int imprimeErro(char* erro);
 void atualizaTS(int num, char token[TAM_TOKEN]);
 char *intToStr(int n);

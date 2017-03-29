@@ -50,7 +50,13 @@
      T_END = 266,
      VAR = 267,
      IDENT = 268,
-     ATRIBUICAO = 269
+     ATRIBUICAO = 269,
+     WHILE = 270,
+     DO = 271,
+     IF = 272,
+     THEN = 273,
+     ELSE = 274,
+     IGUAL = 275
    };
 #endif
 /* Tokens.  */
@@ -66,6 +72,12 @@
 #define VAR 267
 #define IDENT 268
 #define ATRIBUICAO 269
+#define WHILE 270
+#define DO 271
+#define IF 272
+#define THEN 273
+#define ELSE 274
+#define IGUAL 275
 
 
 

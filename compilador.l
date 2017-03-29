@@ -97,7 +97,41 @@ end { simbolo = simb_end;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" fecha_parenteses ");
           return FECHA_PARENTESES;
- }
+     }
+
+\while { simbolo = simb_while;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" while ");
+          return WHILE;
+          }
+
+\do { simbolo = simb_do;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" do ");
+          return DO;
+     }  
+
+\if  { simbolo = simb_if;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" if ");
+          return IF;
+     }
+
+\then { simbolo = simb_then;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" then ");
+          return THEN;
+     }
+
+\else  { simbolo = simb_else;  
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" else ");
+          return ELSE;
+     }
+\=     { simbolo = simb_igual;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" igual ")
+          return IGUAL;}
 
 {ident} { simbolo = simb_identificador; 
           strncpy (token, yytext, TAM_TOKEN);

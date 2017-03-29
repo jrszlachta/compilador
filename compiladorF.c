@@ -23,7 +23,7 @@
  * ------------------------------------------------------------------- */
 
 FILE* fp=NULL;
-void geraCodigo (char* rot, char* comando, int* arg1, int* arg2) 
+void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3) 
 {
   if (fp == NULL) {
     fp = fopen ("MEPA", "w");
@@ -41,6 +41,10 @@ void geraCodigo (char* rot, char* comando, int* arg1, int* arg2)
   {
     fprintf(fp, ", %d", *arg2);
   }
+  if (arg3 != NULL)
+  {
+    fprintf(fp, ", %d", *arg3);
+  }
   fprintf(fp, "\n");
 }
 
@@ -52,19 +56,5 @@ int imprimeErro ( char* erro ) {
 
 void atualizaTS(int num, char token[TAM_TOKEN])
 {
-  printf("HERE COMES THE TOKEN TUDUDUDUDU %s\n", token); return;
-}
-
-char *intToStr(int n)
-{
-    char *ret;
-    int i, j=0;
-    
-    ret=(char *)malloc(sizeof(char)*10);
-    for (i=0;i<10;i++) ret[i]=' ';
-    ret[i]='0';
-    while (n>0) {ret[i]=0x30+(n%10); n=n/10; i--;}
-    while (i<10) {i++; ret[j]=ret[i]; j++;}
-    ret[j]='\0';
-    return ret;
+  return;
 }
