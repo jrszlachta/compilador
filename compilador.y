@@ -32,10 +32,10 @@ programa    :{
              }
 ;
 
-bloco       : 
+bloco       : {totalVar = 0}
               parte_declara_vars
               { 
-                totalVar = 0
+                
               }
 
               comando_composto 
@@ -95,7 +95,6 @@ comando: comando_sem_rotulo
 comando_sem_rotulo:  IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
                   |  IF expressao THEN comando_sem_rotulo
                   |  WHILE expressao DO comando_sem_rotulo
-                  |
 ;
 
 expressao: IDENT IGUAL IDENT 

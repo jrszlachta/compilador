@@ -4,5 +4,6 @@ var p : integer ;
 begin
 m := n;
 p := m;
-if p=m then p := n;
+while p = m do
+ p := n;
 end.
