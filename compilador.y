@@ -12,6 +12,7 @@
 
 int num_vars, contVar, totalVar;
 int maxRotulo;
+int nivelLexico;
 
 %}
 
@@ -24,12 +25,14 @@ int maxRotulo;
 %%
 
 programa    :{
-             geraCodigo (NULL, "INPP", NULL, NULL, NULL);
+              geraCodigo (NULL, "INPP", NULL, NULL, NULL);
+              nivelLexico = 0;
              }
              PROGRAM IDENT
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO {
-             geraCodigo (NULL, "PARA", NULL, NULL, NULL);
+             bloco PONTO
+             {
+              geraCodigo (NULL, "PARA", NULL, NULL, NULL);
              }
 ;
 
@@ -42,7 +45,7 @@ bloco       : {totalVar = 0}
               comando_composto
               {
                 geraCodigo (NULL, "DMEM", &totalVar, NULL, NULL)
-             }
+              }
 ;
 
 

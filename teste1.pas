@@ -4,4 +4,6 @@ var p : integer ;
 begin
 m := n;
 p := m;
+if m=n then
+  p:=n;
 end.

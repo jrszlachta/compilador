@@ -8,7 +8,7 @@
  *
  * -------------------------------------------------------------------
  *
- * Funções auxiliares ao compilador
+ * Funï¿½ï¿½es auxiliares ao compilador
  *
  * ------------------------------------------------------------------- */
 
@@ -19,11 +19,11 @@
 
 
 /* -------------------------------------------------------------------
- *  variáveis globais
+ *  variï¿½veis globais
  * ------------------------------------------------------------------- */
 
 FILE* fp=NULL;
-void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3) 
+void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3)
 {
   if (fp == NULL) {
     fp = fopen ("MEPA", "w");
@@ -53,8 +53,27 @@ int imprimeErro ( char* erro ) {
   exit(-1);
 }
 
+tSimboloTs* criaSimboloTS(char* rot, int categoria, int nivel)
+{
+ return NULL;
+}
+
+int insereTS(tSimboloTs* s)
+{
+ return 0;
+}
+
+tSimboloTs* buscaTS(char* rot)
+{
+ return NULL;
+}
 
 void atualizaTS(int num, char token[TAM_TOKEN])
 {
   return;
+}
+
+int removeTS(int n)
+{
+ return 0;
 }
