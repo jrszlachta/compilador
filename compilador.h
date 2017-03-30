@@ -7,25 +7,27 @@
  *
  * -------------------------------------------------------------------
  *
- * Tipos, protótipos e vaiáveis globais do compilador
+ * Tipos, protï¿½tipos e vaiï¿½veis globais do compilador
  *
  * ------------------------------------------------------------------- */
 
+#include "list.h"
+
 #define TAM_TOKEN 16
 
-typedef enum simbolos { 
-  simb_program, simb_var, simb_begin, simb_end, 
+typedef enum simbolos {
+  simb_program, simb_var, simb_begin, simb_end,
   simb_identificador, simb_numero,
   simb_ponto, simb_virgula, simb_ponto_e_virgula, simb_dois_pontos,
   simb_atribuicao, simb_abre_parenteses, simb_fecha_parenteses,
-  simb_while, simb_do, simb_if, simb_then, simb_else, 
+  simb_while, simb_do, simb_if, simb_then, simb_else,
   simb_igual,
 } simbolos;
 
 
 
 /* -------------------------------------------------------------------
- * variáveis globais
+ * variï¿½veis globais
  * ------------------------------------------------------------------- */
 
 extern simbolos simbolo, relacao;
