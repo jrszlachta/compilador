@@ -4,6 +4,7 @@ var p : integer ;
 begin
 m := n;
 p := m;
-if m=n then
-  p:=n;
+if a = b then
+  a:=b;
+n := 0;
 end.

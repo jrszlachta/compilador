@@ -18,9 +18,9 @@ int nivelLexico;
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
-%token T_BEGIN T_END VAR IDENT ATRIBUICAO
+%token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token WHILE DO IF THEN ELSE
-%token IGUAL
+%token IGUAL MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL DIF
 
 %%
 
@@ -78,7 +78,7 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT
-              { contVar++; totalVar++ /* insere �ltima vars na tabela de s�mbolos */ }
+              { contVar++; totalVar++; /* insere �ltima vars na tabela de s�mbolos */ }
             | IDENT { contVar++ ; totalVar++ /* insere vars na tabela de s�mbolos */}
 ;
 
@@ -87,7 +87,7 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-comando_composto: T_BEGIN comandos T_END
+comando_composto: T_BEGIN comandos T_END | comando
 
 comandos: comando | comandos comando
 ;
@@ -102,19 +102,25 @@ comando_sem_rotulo:  regra_atribuicao
 ;
 
 regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
+                | IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA
 ;
 
-regra_condicional: IF expressao THEN {printf("*");} comando_sem_rotulo
+regra_condicional: IF expressao {printf("*\n");} THEN {printf("*2\n");} comando_composto
 ;
 
 regra_while: WHILE
     { //gera
     }
-expressao DO comando_sem_rotulo
+             expressao DO comando_composto
 ;
 
-expressao: IDENT IGUAL IDENT
+expressao: IDENT compara IDENT {/*empilha*/}
+         | IDENT compara NUMERO
+         | NUMERO compara IDENT
+         | NUMERO compara NUMERO
 ;
+
+compara: IGUAL | MENOR | MENOR_IGUAL | MAIOR | MAIOR_IGUAL | DIF
 
 %%
 
