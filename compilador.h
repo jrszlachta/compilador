@@ -52,19 +52,17 @@ typedef struct cpTs
  int* tipoPassagem;
 }tCpTs;
 
-union categoriaTs
-{
- tVsTs* v;
- tPfTs* p;
- tCpTs* c;
-};
-
 typedef struct simboloTs
 {
  char* ident;
  int categoria;
  int nivel;
- union categoriaTs;
+ union categoriaTs
+ {
+  tVsTs* v;
+  tPfTs* p;
+  tCpTs* c;
+ }categoriaTs;
 }tSimboloTs;
 
 /* -------------------------------------------------------------------
