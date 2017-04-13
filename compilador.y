@@ -13,6 +13,7 @@
 int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico;
+list TS = criaTS();
 
 %}
 

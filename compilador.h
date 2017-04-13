@@ -84,6 +84,7 @@ int yylex();
 void yyerror(const char *s);
 void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3);
 int imprimeErro(char* erro);
+list criaTS();
 tSimboloTs* criaSimboloTS(char* rot, int categoria, int nivel);
 int insereTS(tSimboloTs* s);
 tSimboloTs* buscaTS(char* rot);
