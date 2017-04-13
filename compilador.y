@@ -26,16 +26,16 @@ list TS;
 
 %%
 
-programa    :{
-              geraCodigo (NULL, "INPP", NULL, NULL, NULL);
-              nivelLexico = 0;
-             }
-             PROGRAM IDENT
-             ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO
-             {
-              geraCodigo (NULL, "PARA", NULL, NULL, NULL);
-             }
+programa:{
+          geraCodigo (NULL, "INPP", NULL, NULL, NULL);
+          nivelLexico = 0;
+         }
+         PROGRAM IDENT
+         ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
+         bloco PONTO
+         {
+          geraCodigo (NULL, "PARA", NULL, NULL, NULL);
+         }
 ;
 
 bloco       : {totalVar = 0}
@@ -88,38 +88,17 @@ lista_idents: lista_idents VIRGULA IDENT
 
 
 comando_composto: T_BEGIN comandos T_END | comando
+;
 
 comandos: comando | comandos comando
 ;
 
 comando: comando_sem_rotulo
-      |  IDENT DOIS_PONTOS comando_sem_rotulo
 ;
 
-comando_sem_rotulo:  regra_atribuicao
+comando_sem_rotulo:  expressao
                   |  regra_condicional
                   |  regra_while
-;
-
-regra_atribuicao: IDENT {strcpy(elementoEsquerda, token); printf("ESQ: %s\n", elementoEsquerda)} ATRIBUICAO IDENT
-                                                          {
-                                                           tSimboloTs* t = buscaTS(token);
-                                                           if (t && t->categoria==TS_CAT_VS)
-                                                            geraCodigo(NULL, "CRVL", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
-                                                          } PONTO_E_VIRGULA
-                                                          {
-                                                           printf("ESQ: %s\n", elementoEsquerda);
-                                                           tSimboloTs* t = buscaTS(elementoEsquerda);
-                                                           if (t && t->categoria==TS_CAT_VS)
-                                                            geraCodigo(NULL, "ARMZ", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
-                                                          }
-                | IDENT {strcpy(elementoEsquerda, token); printf("ESQ: %s\n", elementoEsquerda);} ATRIBUICAO NUMERO {int val = atoi(token); geraCodigo(NULL, "CRCT", &val, NULL, NULL)} PONTO_E_VIRGULA
-                {
-                 printf("ESQ: %s\n", elementoEsquerda);
-                 tSimboloTs* t = buscaTS(elementoEsquerda);
-                 if (t && t->categoria==TS_CAT_VS)
-                  geraCodigo(NULL, "ARMZ", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
-                }
 ;
 
 regra_condicional: IF expressao THEN comando_composto
@@ -131,18 +110,28 @@ regra_while: WHILE
     expressao DO comando_composto
 ;
 
-expressao: compara;
-compara: ;
+expressao: variavel {strcpy(elementoEsquerda, token); printf("ESQ: %s\n", elementoEsquerda)} simbolos 
+;
 
-/*
-expressao: IDENT compara IDENT
-         | IDENT compara NUMERO
-         | NUMERO compara IDENT
-         | NUMERO compara NUMERO
+variavel: IDENT {
+                 tSimboloTs* t = buscaTS(token);
+                 if (t && t->categoria==TS_CAT_VS)
+                  geraCodigo(NULL, "CRVL", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
+                }
+        | NUMERO {int val = atoi(token); geraCodigo(NULL, "CRCT", &val, NULL, NULL)}
+;
+
+simbolos: ATRIBUICAO simbolos PONTO_E_VIRGULA {
+                                               printf("ESQ: %s\n", elementoEsquerda);
+                                               tSimboloTs* t = buscaTS(elementoEsquerda);
+                                               if (t && t->categoria==TS_CAT_VS)
+                                                geraCodigo(NULL, "ARMZ", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
+                                              }
+        | compara simbolos
 ;
 
 compara: IGUAL | MENOR | MENOR_IGUAL | MAIOR | MAIOR_IGUAL | DIF
-*/
+;
 %%
 
 //Gera rótulo
