@@ -1501,14 +1501,9 @@ yyreduce:
     ;}
     break;
 
-  case 38:
-#line 117 "compilador.y"
-    {/*empilha*/;}
-    break;
-
 
 /* Line 1267 of yacc.c.  */
-#line 1512 "compilador.tab.c"
+#line 1507 "compilador.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

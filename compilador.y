@@ -105,16 +105,16 @@ regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
                 | IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA
 ;
 
-regra_condicional: IF expressao {printf("*\n");} THEN {printf("*2\n");} comando_composto
+regra_condicional: IF expressao THEN comando_composto
 ;
 
 regra_while: WHILE
     { //gera
     }
-             expressao DO comando_composto
+    expressao DO comando_composto
 ;
 
-expressao: IDENT compara IDENT {/*empilha*/}
+expressao: IDENT compara IDENT
          | IDENT compara NUMERO
          | NUMERO compara IDENT
          | NUMERO compara NUMERO
