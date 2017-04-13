@@ -14,11 +14,20 @@
 #include "list.h"
 
 #define TAM_TOKEN 16
-#define TS_CAT_VS 0;
-#define TS_CAT_PF 1;
-#define TS_CAT_CP 2;
-#define TS_TIP_INT 0;
-#define TS_TIP_BOO 1;
+//Categoria da tabela de símbolos: Variável Simples
+#define TS_CAT_VS 0
+//Categoria da tabela de símboloes: Parâmetro Formal
+#define TS_CAT_PF 1
+//Categoria da tabela de símbolos: Procedimento
+#define TS_CAT_CP 2
+//Tipo Integer
+#define TS_TIP_INT 0
+//Tipo Boolean
+#define TS_TIP_BOO 1
+//Tipo de passagem de parâmetro: Valor
+#define TS_PAR_VAL 0
+//Tipo de passagem de parâmetro: Referência
+#define TS_PAR_REF 1
 
 typedef enum simbolos {
   simb_program, simb_var, simb_begin, simb_end,
@@ -84,10 +93,21 @@ int yylex();
 void yyerror(const char *s);
 void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3);
 int imprimeErro(char* erro);
+
 list criaTS();
+void imprimeSimboloTS(tSimboloTs* t);
 tSimboloTs* criaSimboloTS(char* rot, int categoria, int nivel);
+tSimboloTs* criaSimboloTS_VS(char *rot, int categoria, int nivel, int deslocamento);
+
+void atualizaSimboloTS_VS(tSimboloTs* s, int tipo);
+void atualizaSimboloTS_PF(tSimboloTs* s, int deslocamento, int tipoPassagem);
+void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, int* tipoPassagem);
+
 int insereTS(tSimboloTs* s);
 tSimboloTs* buscaTS(char* rot);
 void atualizaTS(int num, char token[TAM_TOKEN]);
 int removeTS(int s);
 char *intToStr(int n);
+char *catTS(int categoria);
+char *tipoTS(int tipo);
+char *tipoPassagemTS(int tipo);

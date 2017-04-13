@@ -1,11 +1,24 @@
 Terminals which are not used
 
    ELSE
+   IGUAL
+   MENOR
+   MENOR_IGUAL
+   MAIOR
+   MAIOR_IGUAL
+   DIF
+
+
+Rules never reduced
+
+   32 @9: /* empty */
 
 
 State 14 conflicts: 1 reduce/reduce
 State 16 conflicts: 5 reduce/reduce
+State 23 conflicts: 1 reduce/reduce
 State 32 conflicts: 1 reduce/reduce
+State 48 conflicts: 1 reduce/reduce
 
 
 Grammar
@@ -37,53 +50,48 @@ Grammar
 
    14 @6: /* empty */
 
-   15 declara_var: @5 lista_id_var DOIS_PONTOS tipo @6 PONTO_E_VIRGULA
+   15 declara_var: @5 lista_id_var DOIS_PONTOS IDENT @6 PONTO_E_VIRGULA
 
-   16 tipo: IDENT
+   16 lista_id_var: lista_id_var VIRGULA IDENT
+   17             | IDENT
 
-   17 lista_id_var: lista_id_var VIRGULA IDENT
-   18             | IDENT
+   18 lista_idents: lista_idents VIRGULA IDENT
+   19             | IDENT
 
-   19 lista_idents: lista_idents VIRGULA IDENT
-   20             | IDENT
+   20 comando_composto: T_BEGIN comandos T_END
+   21                 | comando
 
-   21 comando_composto: T_BEGIN comandos T_END
-   22                 | comando
+   22 comandos: comando
+   23         | comandos comando
 
-   23 comandos: comando
-   24         | comandos comando
+   24 comando: comando_sem_rotulo
+   25        | IDENT DOIS_PONTOS comando_sem_rotulo
 
-   25 comando: comando_sem_rotulo
-   26        | IDENT DOIS_PONTOS comando_sem_rotulo
+   26 comando_sem_rotulo: regra_atribuicao
+   27                   | regra_condicional
+   28                   | regra_while
 
-   27 comando_sem_rotulo: regra_atribuicao
-   28                   | regra_condicional
-   29                   | regra_while
+   29 @7: /* empty */
 
-   30 regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA
-   31                 | IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA
+   30 @8: /* empty */
 
-   32 @7: /* empty */
+   31 regra_atribuicao: IDENT @7 ATRIBUICAO IDENT @8 PONTO_E_VIRGULA
 
-   33 @8: /* empty */
+   32 @9: /* empty */
 
-   34 regra_condicional: IF expressao @7 THEN @8 comando_composto
+   33 @10: /* empty */
 
-   35 @9: /* empty */
+   34 regra_atribuicao: IDENT @9 ATRIBUICAO NUMERO @10 PONTO_E_VIRGULA
 
-   36 regra_while: WHILE @9 expressao DO comando_composto
+   35 regra_condicional: IF expressao THEN comando_composto
 
-   37 expressao: IDENT compara IDENT
-   38          | IDENT compara NUMERO
-   39          | NUMERO compara IDENT
-   40          | NUMERO compara NUMERO
+   36 @11: /* empty */
 
-   41 compara: IGUAL
-   42        | MENOR
-   43        | MENOR_IGUAL
-   44        | MAIOR
-   45        | MAIOR_IGUAL
-   46        | DIF
+   37 regra_while: WHILE @11 expressao DO comando_composto
+
+   38 expressao: compara
+
+   39 compara: /* empty */
 
 
 Terminals, with rules where they appear
@@ -93,27 +101,27 @@ error (256)
 PROGRAM (258) 2
 ABRE_PARENTESES (259) 2
 FECHA_PARENTESES (260) 2
-VIRGULA (261) 17 19
-PONTO_E_VIRGULA (262) 2 15 30 31
-DOIS_PONTOS (263) 15 26
+VIRGULA (261) 16 18
+PONTO_E_VIRGULA (262) 2 15 31 34
+DOIS_PONTOS (263) 15 25
 PONTO (264) 2
-T_BEGIN (265) 21
-T_END (266) 21
+T_BEGIN (265) 20
+T_END (266) 20
 VAR (267) 9
-IDENT (268) 2 16 17 18 19 20 26 30 31 37 38 39
-NUMERO (269) 31 38 39 40
-ATRIBUICAO (270) 30 31
-WHILE (271) 36
-DO (272) 36
-IF (273) 34
-THEN (274) 34
+IDENT (268) 2 15 16 17 18 19 25 31 34
+NUMERO (269) 34
+ATRIBUICAO (270) 31 34
+WHILE (271) 37
+DO (272) 37
+IF (273) 35
+THEN (274) 35
 ELSE (275)
-IGUAL (276) 41
-MENOR (277) 42
-MENOR_IGUAL (278) 43
-MAIOR (279) 44
-MAIOR_IGUAL (280) 45
-DIF (281) 46
+IGUAL (276)
+MENOR (277)
+MENOR_IGUAL (278)
+MAIOR (279)
+MAIOR_IGUAL (280)
+DIF (281)
 
 
 Nonterminals, with rules where they appear
@@ -144,36 +152,38 @@ declara_var (37)
     on left: 13, on right: 15
 @6 (39)
     on left: 14, on right: 15
-tipo (40)
-    on left: 16, on right: 15
-lista_id_var (41)
-    on left: 17 18, on right: 15 17
-lista_idents (42)
-    on left: 19 20, on right: 2 19
-comando_composto (43)
-    on left: 21 22, on right: 5 34 36
-comandos (44)
-    on left: 23 24, on right: 21 24
-comando (45)
-    on left: 25 26, on right: 22 23 24
-comando_sem_rotulo (46)
-    on left: 27 28 29, on right: 25 26
-regra_atribuicao (47)
-    on left: 30 31, on right: 27
-regra_condicional (48)
-    on left: 34, on right: 28
-@7 (49)
+lista_id_var (40)
+    on left: 16 17, on right: 15 16
+lista_idents (41)
+    on left: 18 19, on right: 2 18
+comando_composto (42)
+    on left: 20 21, on right: 5 35 37
+comandos (43)
+    on left: 22 23, on right: 20 23
+comando (44)
+    on left: 24 25, on right: 21 22 23
+comando_sem_rotulo (45)
+    on left: 26 27 28, on right: 24 25
+regra_atribuicao (46)
+    on left: 31 34, on right: 26
+@7 (47)
+    on left: 29, on right: 31
+@8 (48)
+    on left: 30, on right: 31
+@9 (49)
     on left: 32, on right: 34
-@8 (50)
+@10 (50)
     on left: 33, on right: 34
-regra_while (51)
-    on left: 36, on right: 29
-@9 (52)
-    on left: 35, on right: 36
-expressao (53)
-    on left: 37 38 39 40, on right: 34 36
-compara (54)
-    on left: 41 42 43 44 45 46, on right: 37 38 39 40
+regra_condicional (51)
+    on left: 35, on right: 27
+regra_while (52)
+    on left: 37, on right: 28
+@11 (53)
+    on left: 36, on right: 37
+expressao (54)
+    on left: 38, on right: 35 37
+compara (55)
+    on left: 39, on right: 38
 
 
 state 0
@@ -232,15 +242,15 @@ state 6
 
 state 7
 
-   20 lista_idents: IDENT .
+   19 lista_idents: IDENT .
 
-    $default  reduce using rule 20 (lista_idents)
+    $default  reduce using rule 19 (lista_idents)
 
 
 state 8
 
     2 programa: @1 PROGRAM IDENT ABRE_PARENTESES lista_idents . FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
-   19 lista_idents: lista_idents . VIRGULA IDENT
+   18 lista_idents: lista_idents . VIRGULA IDENT
 
     FECHA_PARENTESES  shift, and go to state 9
     VIRGULA           shift, and go to state 10
@@ -255,7 +265,7 @@ state 9
 
 state 10
 
-   19 lista_idents: lista_idents VIRGULA . IDENT
+   18 lista_idents: lista_idents VIRGULA . IDENT
 
     IDENT  shift, and go to state 12
 
@@ -272,9 +282,9 @@ state 11
 
 state 12
 
-   19 lista_idents: lista_idents VIRGULA IDENT .
+   18 lista_idents: lista_idents VIRGULA IDENT .
 
-    $default  reduce using rule 19 (lista_idents)
+    $default  reduce using rule 18 (lista_idents)
 
 
 state 13
@@ -377,7 +387,7 @@ state 21
 
 state 22
 
-   21 comando_composto: T_BEGIN . comandos T_END
+   20 comando_composto: T_BEGIN . comandos T_END
 
     IDENT  shift, and go to state 23
     WHILE  shift, and go to state 24
@@ -393,31 +403,37 @@ state 22
 
 state 23
 
-   26 comando: IDENT . DOIS_PONTOS comando_sem_rotulo
-   30 regra_atribuicao: IDENT . ATRIBUICAO IDENT PONTO_E_VIRGULA
-   31                 | IDENT . ATRIBUICAO NUMERO PONTO_E_VIRGULA
+   25 comando: IDENT . DOIS_PONTOS comando_sem_rotulo
+   31 regra_atribuicao: IDENT . @7 ATRIBUICAO IDENT @8 PONTO_E_VIRGULA
+   34                 | IDENT . @9 ATRIBUICAO NUMERO @10 PONTO_E_VIRGULA
 
     DOIS_PONTOS  shift, and go to state 37
-    ATRIBUICAO   shift, and go to state 38
+
+    ATRIBUICAO  reduce using rule 29 (@7)
+    ATRIBUICAO  [reduce using rule 32 (@9)]
+    $default    reduce using rule 29 (@7)
+
+    @7  go to state 38
+    @9  go to state 39
 
 
 state 24
 
-   36 regra_while: WHILE . @9 expressao DO comando_composto
+   37 regra_while: WHILE . @11 expressao DO comando_composto
 
-    $default  reduce using rule 35 (@9)
+    $default  reduce using rule 36 (@11)
 
-    @9  go to state 39
+    @11  go to state 40
 
 
 state 25
 
-   34 regra_condicional: IF . expressao @7 THEN @8 comando_composto
+   35 regra_condicional: IF . expressao THEN comando_composto
 
-    IDENT   shift, and go to state 40
-    NUMERO  shift, and go to state 41
+    $default  reduce using rule 39 (compara)
 
-    expressao  go to state 42
+    expressao  go to state 41
+    compara    go to state 42
 
 
 state 26
@@ -429,37 +445,37 @@ state 26
 
 state 27
 
-   22 comando_composto: comando .
+   21 comando_composto: comando .
 
-    $default  reduce using rule 22 (comando_composto)
+    $default  reduce using rule 21 (comando_composto)
 
 
 state 28
 
-   25 comando: comando_sem_rotulo .
+   24 comando: comando_sem_rotulo .
 
-    $default  reduce using rule 25 (comando)
+    $default  reduce using rule 24 (comando)
 
 
 state 29
 
-   27 comando_sem_rotulo: regra_atribuicao .
+   26 comando_sem_rotulo: regra_atribuicao .
 
-    $default  reduce using rule 27 (comando_sem_rotulo)
+    $default  reduce using rule 26 (comando_sem_rotulo)
 
 
 state 30
 
-   28 comando_sem_rotulo: regra_condicional .
+   27 comando_sem_rotulo: regra_condicional .
 
-    $default  reduce using rule 28 (comando_sem_rotulo)
+    $default  reduce using rule 27 (comando_sem_rotulo)
 
 
 state 31
 
-   29 comando_sem_rotulo: regra_while .
+   28 comando_sem_rotulo: regra_while .
 
-    $default  reduce using rule 29 (comando_sem_rotulo)
+    $default  reduce using rule 28 (comando_sem_rotulo)
 
 
 state 32
@@ -484,7 +500,7 @@ state 33
 
 state 34
 
-   15 declara_var: @5 . lista_id_var DOIS_PONTOS tipo @6 PONTO_E_VIRGULA
+   15 declara_var: @5 . lista_id_var DOIS_PONTOS IDENT @6 PONTO_E_VIRGULA
 
     IDENT  shift, and go to state 44
 
@@ -493,8 +509,8 @@ state 34
 
 state 35
 
-   21 comando_composto: T_BEGIN comandos . T_END
-   24 comandos: comandos . comando
+   20 comando_composto: T_BEGIN comandos . T_END
+   23 comandos: comandos . comando
 
     T_END  shift, and go to state 46
     IDENT  shift, and go to state 23
@@ -510,14 +526,14 @@ state 35
 
 state 36
 
-   23 comandos: comando .
+   22 comandos: comando .
 
-    $default  reduce using rule 23 (comandos)
+    $default  reduce using rule 22 (comandos)
 
 
 state 37
 
-   26 comando: IDENT DOIS_PONTOS . comando_sem_rotulo
+   25 comando: IDENT DOIS_PONTOS . comando_sem_rotulo
 
     IDENT  shift, and go to state 48
     WHILE  shift, and go to state 24
@@ -531,60 +547,40 @@ state 37
 
 state 38
 
-   30 regra_atribuicao: IDENT ATRIBUICAO . IDENT PONTO_E_VIRGULA
-   31                 | IDENT ATRIBUICAO . NUMERO PONTO_E_VIRGULA
+   31 regra_atribuicao: IDENT @7 . ATRIBUICAO IDENT @8 PONTO_E_VIRGULA
 
-    IDENT   shift, and go to state 50
-    NUMERO  shift, and go to state 51
+    ATRIBUICAO  shift, and go to state 50
 
 
 state 39
 
-   36 regra_while: WHILE @9 . expressao DO comando_composto
+   34 regra_atribuicao: IDENT @9 . ATRIBUICAO NUMERO @10 PONTO_E_VIRGULA
 
-    IDENT   shift, and go to state 40
-    NUMERO  shift, and go to state 41
-
-    expressao  go to state 52
+    ATRIBUICAO  shift, and go to state 51
 
 
 state 40
 
-   37 expressao: IDENT . compara IDENT
-   38          | IDENT . compara NUMERO
+   37 regra_while: WHILE @11 . expressao DO comando_composto
 
-    IGUAL        shift, and go to state 53
-    MENOR        shift, and go to state 54
-    MENOR_IGUAL  shift, and go to state 55
-    MAIOR        shift, and go to state 56
-    MAIOR_IGUAL  shift, and go to state 57
-    DIF          shift, and go to state 58
+    $default  reduce using rule 39 (compara)
 
-    compara  go to state 59
+    expressao  go to state 52
+    compara    go to state 42
 
 
 state 41
 
-   39 expressao: NUMERO . compara IDENT
-   40          | NUMERO . compara NUMERO
+   35 regra_condicional: IF expressao . THEN comando_composto
 
-    IGUAL        shift, and go to state 53
-    MENOR        shift, and go to state 54
-    MENOR_IGUAL  shift, and go to state 55
-    MAIOR        shift, and go to state 56
-    MAIOR_IGUAL  shift, and go to state 57
-    DIF          shift, and go to state 58
-
-    compara  go to state 60
+    THEN  shift, and go to state 53
 
 
 state 42
 
-   34 regra_condicional: IF expressao . @7 THEN @8 comando_composto
+   38 expressao: compara .
 
-    $default  reduce using rule 32 (@7)
-
-    @7  go to state 61
+    $default  reduce using rule 38 (expressao)
 
 
 state 43
@@ -596,261 +592,85 @@ state 43
 
 state 44
 
-   18 lista_id_var: IDENT .
-
-    $default  reduce using rule 18 (lista_id_var)
-
-
-state 45
-
-   15 declara_var: @5 lista_id_var . DOIS_PONTOS tipo @6 PONTO_E_VIRGULA
-   17 lista_id_var: lista_id_var . VIRGULA IDENT
-
-    VIRGULA      shift, and go to state 62
-    DOIS_PONTOS  shift, and go to state 63
-
-
-state 46
-
-   21 comando_composto: T_BEGIN comandos T_END .
-
-    $default  reduce using rule 21 (comando_composto)
-
-
-state 47
-
-   24 comandos: comandos comando .
-
-    $default  reduce using rule 24 (comandos)
-
-
-state 48
-
-   30 regra_atribuicao: IDENT . ATRIBUICAO IDENT PONTO_E_VIRGULA
-   31                 | IDENT . ATRIBUICAO NUMERO PONTO_E_VIRGULA
-
-    ATRIBUICAO  shift, and go to state 38
-
-
-state 49
-
-   26 comando: IDENT DOIS_PONTOS comando_sem_rotulo .
-
-    $default  reduce using rule 26 (comando)
-
-
-state 50
-
-   30 regra_atribuicao: IDENT ATRIBUICAO IDENT . PONTO_E_VIRGULA
-
-    PONTO_E_VIRGULA  shift, and go to state 64
-
-
-state 51
-
-   31 regra_atribuicao: IDENT ATRIBUICAO NUMERO . PONTO_E_VIRGULA
-
-    PONTO_E_VIRGULA  shift, and go to state 65
-
-
-state 52
-
-   36 regra_while: WHILE @9 expressao . DO comando_composto
-
-    DO  shift, and go to state 66
-
-
-state 53
-
-   41 compara: IGUAL .
-
-    $default  reduce using rule 41 (compara)
-
-
-state 54
-
-   42 compara: MENOR .
-
-    $default  reduce using rule 42 (compara)
-
-
-state 55
-
-   43 compara: MENOR_IGUAL .
-
-    $default  reduce using rule 43 (compara)
-
-
-state 56
-
-   44 compara: MAIOR .
-
-    $default  reduce using rule 44 (compara)
-
-
-state 57
-
-   45 compara: MAIOR_IGUAL .
-
-    $default  reduce using rule 45 (compara)
-
-
-state 58
-
-   46 compara: DIF .
-
-    $default  reduce using rule 46 (compara)
-
-
-state 59
-
-   37 expressao: IDENT compara . IDENT
-   38          | IDENT compara . NUMERO
-
-    IDENT   shift, and go to state 67
-    NUMERO  shift, and go to state 68
-
-
-state 60
-
-   39 expressao: NUMERO compara . IDENT
-   40          | NUMERO compara . NUMERO
-
-    IDENT   shift, and go to state 69
-    NUMERO  shift, and go to state 70
-
-
-state 61
-
-   34 regra_condicional: IF expressao @7 . THEN @8 comando_composto
-
-    THEN  shift, and go to state 71
-
-
-state 62
-
-   17 lista_id_var: lista_id_var VIRGULA . IDENT
-
-    IDENT  shift, and go to state 72
-
-
-state 63
-
-   15 declara_var: @5 lista_id_var DOIS_PONTOS . tipo @6 PONTO_E_VIRGULA
-
-    IDENT  shift, and go to state 73
-
-    tipo  go to state 74
-
-
-state 64
-
-   30 regra_atribuicao: IDENT ATRIBUICAO IDENT PONTO_E_VIRGULA .
-
-    $default  reduce using rule 30 (regra_atribuicao)
-
-
-state 65
-
-   31 regra_atribuicao: IDENT ATRIBUICAO NUMERO PONTO_E_VIRGULA .
-
-    $default  reduce using rule 31 (regra_atribuicao)
-
-
-state 66
-
-   36 regra_while: WHILE @9 expressao DO . comando_composto
-
-    T_BEGIN  shift, and go to state 22
-    IDENT    shift, and go to state 23
-    WHILE    shift, and go to state 24
-    IF       shift, and go to state 25
-
-    comando_composto    go to state 75
-    comando             go to state 27
-    comando_sem_rotulo  go to state 28
-    regra_atribuicao    go to state 29
-    regra_condicional   go to state 30
-    regra_while         go to state 31
-
-
-state 67
-
-   37 expressao: IDENT compara IDENT .
-
-    $default  reduce using rule 37 (expressao)
-
-
-state 68
-
-   38 expressao: IDENT compara NUMERO .
-
-    $default  reduce using rule 38 (expressao)
-
-
-state 69
-
-   39 expressao: NUMERO compara IDENT .
-
-    $default  reduce using rule 39 (expressao)
-
-
-state 70
-
-   40 expressao: NUMERO compara NUMERO .
-
-    $default  reduce using rule 40 (expressao)
-
-
-state 71
-
-   34 regra_condicional: IF expressao @7 THEN . @8 comando_composto
-
-    $default  reduce using rule 33 (@8)
-
-    @8  go to state 76
-
-
-state 72
-
-   17 lista_id_var: lista_id_var VIRGULA IDENT .
+   17 lista_id_var: IDENT .
 
     $default  reduce using rule 17 (lista_id_var)
 
 
-state 73
+state 45
 
-   16 tipo: IDENT .
+   15 declara_var: @5 lista_id_var . DOIS_PONTOS IDENT @6 PONTO_E_VIRGULA
+   16 lista_id_var: lista_id_var . VIRGULA IDENT
 
-    $default  reduce using rule 16 (tipo)
-
-
-state 74
-
-   15 declara_var: @5 lista_id_var DOIS_PONTOS tipo . @6 PONTO_E_VIRGULA
-
-    $default  reduce using rule 14 (@6)
-
-    @6  go to state 77
+    VIRGULA      shift, and go to state 54
+    DOIS_PONTOS  shift, and go to state 55
 
 
-state 75
+state 46
 
-   36 regra_while: WHILE @9 expressao DO comando_composto .
+   20 comando_composto: T_BEGIN comandos T_END .
 
-    $default  reduce using rule 36 (regra_while)
+    $default  reduce using rule 20 (comando_composto)
 
 
-state 76
+state 47
 
-   34 regra_condicional: IF expressao @7 THEN @8 . comando_composto
+   23 comandos: comandos comando .
+
+    $default  reduce using rule 23 (comandos)
+
+
+state 48
+
+   31 regra_atribuicao: IDENT . @7 ATRIBUICAO IDENT @8 PONTO_E_VIRGULA
+   34                 | IDENT . @9 ATRIBUICAO NUMERO @10 PONTO_E_VIRGULA
+
+    ATRIBUICAO  reduce using rule 29 (@7)
+    ATRIBUICAO  [reduce using rule 32 (@9)]
+    $default    reduce using rule 29 (@7)
+
+    @7  go to state 38
+    @9  go to state 39
+
+
+state 49
+
+   25 comando: IDENT DOIS_PONTOS comando_sem_rotulo .
+
+    $default  reduce using rule 25 (comando)
+
+
+state 50
+
+   31 regra_atribuicao: IDENT @7 ATRIBUICAO . IDENT @8 PONTO_E_VIRGULA
+
+    IDENT  shift, and go to state 56
+
+
+state 51
+
+   34 regra_atribuicao: IDENT @9 ATRIBUICAO . NUMERO @10 PONTO_E_VIRGULA
+
+    NUMERO  shift, and go to state 57
+
+
+state 52
+
+   37 regra_while: WHILE @11 expressao . DO comando_composto
+
+    DO  shift, and go to state 58
+
+
+state 53
+
+   35 regra_condicional: IF expressao THEN . comando_composto
 
     T_BEGIN  shift, and go to state 22
     IDENT    shift, and go to state 23
     WHILE    shift, and go to state 24
     IF       shift, and go to state 25
 
-    comando_composto    go to state 78
+    comando_composto    go to state 59
     comando             go to state 27
     comando_sem_rotulo  go to state 28
     regra_atribuicao    go to state 29
@@ -858,22 +678,122 @@ state 76
     regra_while         go to state 31
 
 
-state 77
+state 54
 
-   15 declara_var: @5 lista_id_var DOIS_PONTOS tipo @6 . PONTO_E_VIRGULA
+   16 lista_id_var: lista_id_var VIRGULA . IDENT
 
-    PONTO_E_VIRGULA  shift, and go to state 79
-
-
-state 78
-
-   34 regra_condicional: IF expressao @7 THEN @8 comando_composto .
-
-    $default  reduce using rule 34 (regra_condicional)
+    IDENT  shift, and go to state 60
 
 
-state 79
+state 55
 
-   15 declara_var: @5 lista_id_var DOIS_PONTOS tipo @6 PONTO_E_VIRGULA .
+   15 declara_var: @5 lista_id_var DOIS_PONTOS . IDENT @6 PONTO_E_VIRGULA
+
+    IDENT  shift, and go to state 61
+
+
+state 56
+
+   31 regra_atribuicao: IDENT @7 ATRIBUICAO IDENT . @8 PONTO_E_VIRGULA
+
+    $default  reduce using rule 30 (@8)
+
+    @8  go to state 62
+
+
+state 57
+
+   34 regra_atribuicao: IDENT @9 ATRIBUICAO NUMERO . @10 PONTO_E_VIRGULA
+
+    $default  reduce using rule 33 (@10)
+
+    @10  go to state 63
+
+
+state 58
+
+   37 regra_while: WHILE @11 expressao DO . comando_composto
+
+    T_BEGIN  shift, and go to state 22
+    IDENT    shift, and go to state 23
+    WHILE    shift, and go to state 24
+    IF       shift, and go to state 25
+
+    comando_composto    go to state 64
+    comando             go to state 27
+    comando_sem_rotulo  go to state 28
+    regra_atribuicao    go to state 29
+    regra_condicional   go to state 30
+    regra_while         go to state 31
+
+
+state 59
+
+   35 regra_condicional: IF expressao THEN comando_composto .
+
+    $default  reduce using rule 35 (regra_condicional)
+
+
+state 60
+
+   16 lista_id_var: lista_id_var VIRGULA IDENT .
+
+    $default  reduce using rule 16 (lista_id_var)
+
+
+state 61
+
+   15 declara_var: @5 lista_id_var DOIS_PONTOS IDENT . @6 PONTO_E_VIRGULA
+
+    $default  reduce using rule 14 (@6)
+
+    @6  go to state 65
+
+
+state 62
+
+   31 regra_atribuicao: IDENT @7 ATRIBUICAO IDENT @8 . PONTO_E_VIRGULA
+
+    PONTO_E_VIRGULA  shift, and go to state 66
+
+
+state 63
+
+   34 regra_atribuicao: IDENT @9 ATRIBUICAO NUMERO @10 . PONTO_E_VIRGULA
+
+    PONTO_E_VIRGULA  shift, and go to state 67
+
+
+state 64
+
+   37 regra_while: WHILE @11 expressao DO comando_composto .
+
+    $default  reduce using rule 37 (regra_while)
+
+
+state 65
+
+   15 declara_var: @5 lista_id_var DOIS_PONTOS IDENT @6 . PONTO_E_VIRGULA
+
+    PONTO_E_VIRGULA  shift, and go to state 68
+
+
+state 66
+
+   31 regra_atribuicao: IDENT @7 ATRIBUICAO IDENT @8 PONTO_E_VIRGULA .
+
+    $default  reduce using rule 31 (regra_atribuicao)
+
+
+state 67
+
+   34 regra_atribuicao: IDENT @9 ATRIBUICAO NUMERO @10 PONTO_E_VIRGULA .
+
+    $default  reduce using rule 34 (regra_atribuicao)
+
+
+state 68
+
+   15 declara_var: @5 lista_id_var DOIS_PONTOS IDENT @6 PONTO_E_VIRGULA .
 
     $default  reduce using rule 15 (declara_var)
