@@ -1,0 +1,7 @@
+A -> B{a}	- Tomasz
+A -> Aa | B	- Bison
+
+A -> [<B>] [<C>] [<D>] <E>	 - Tomasz
+A -> FE						|
+F -> regras[] | <vazio>		|- Bison
+
