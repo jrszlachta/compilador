@@ -1,6 +1,6 @@
 
-// Testar se funciona corretamente o empilhamento de par�metros
-// passados por valor ou por refer�ncia.
+// Testar se funciona corretamente o empilhamento de parâmetros
+// passados por valor ou por referência.
 
 
 %{
@@ -14,6 +14,7 @@ int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
 char* elementoEsquerda;
+char comando[64];
 list TS;
 
 %}
@@ -21,42 +22,51 @@ list TS;
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
-%token WHILE DO IF THEN ELSE
-%token IGUAL MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL DIF
+%token LABEL TIPO ARRAY PROCEDURE FUNCTION
+%token GOTO IF THEN ELSE WHILE DO OR AND NOT
+%token MAIS MENOS ASTERISCO DIV IGUAL MAIOR MENOR
+%token MAIOR_IGUAL MENOR_IGUAL DIFERENTE
 
 %%
 
 programa:{
-          geraCodigo (NULL, "INPP", NULL, NULL, NULL);
+          geraCodigo (NULL, "INPP");
           nivelLexico = 0;
          }
          PROGRAM IDENT
          ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
          bloco PONTO
          {
-          geraCodigo (NULL, "PARA", NULL, NULL, NULL);
+          geraCodigo (NULL, "PARA");
          }
 ;
 
-bloco       : {totalVar = 0}
-              parte_declara_vars
+bloco       : {totalVar = 0;}
+              parte_declara_rotulos parte_declara_vars parte_declara_procedimentos
               {
 
               }
 
               comando_composto
               {
-                geraCodigo (NULL, "DMEM", &totalVar, NULL, NULL)
+				snprintf(comando, "DMEM %d", totalVar);
+                geraCodigo (NULL, "DMEM");
+				memset(comando, 0, 64);
               }
 ;
 
 
 
 
-parte_declara_vars:  var
+parte_declara_vars:  var declara_vars
                   |  parte_declara_vars var
 ;
 
+parte_declara_rotulos: label num |
+;
+
+parte_declara_procedimentos: procedure | function |
+;
 
 var         : { } VAR declara_vars
             |
@@ -66,20 +76,32 @@ declara_vars: declara_vars declara_var
             | declara_var
 ;
 
-declara_var : {contVar = 0}
+declara_var : {contVar = 0;}
               lista_id_var DOIS_PONTOS
-              IDENT
+              tipo
               {
-                geraCodigo (NULL, "AMEM", &contVar, NULL, NULL);
+				snprintf(comando, "AMEM %d", contVar);
+                geraCodigo (NULL, comando);
                 atualizaTS(contVar, token);
+				contVar = 0;
+				memset(comando, 0, 64);
               }
               PONTO_E_VIRGULA
 ;
 
+tipo: IDENT
+;
 
 lista_id_var: lista_id_var VIRGULA IDENT
-              { contVar++; totalVar++; criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar)}
-            | IDENT { contVar++ ; totalVar++; criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar)}
+              { contVar++;
+				totalVar++;
+				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+			  }
+            | IDENT
+			  { contVar++;
+				totalVar++;
+			 	criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+			  }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -87,50 +109,114 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-comando_composto: T_BEGIN comandos T_END | comando
+comando_composto: T_BEGIN comandos T_END
+				| comando
 ;
 
-comandos: comando | comandos comando
+comandos: comandos comando
+		| comando
 ;
 
-comando: comando_sem_rotulo
+comando: rotulo comando_sem_rotulo
 ;
 
-comando_sem_rotulo:  expressao
-                  |  regra_condicional
-                  |  regra_while
+rotulo: NUMERO |
 ;
 
-regra_condicional: IF expressao THEN comando_composto
+comando_sem_rotulo:  atribuicao
+                  |  chamada_procedimento
+                  |  desvio
+				  |	 comando_composto
+				  |  comando_condicional
+				  |  comando_repetitivo
 ;
 
-regra_while: WHILE
+atribuicao: variavel DOIS_PONTOS IGUAL expressao
+		  {geraCodigo(NULL, "ARMZ");}
+;
+
+expressao:  expressao MAIS texpressao {geraCodigo(NULL, "SOMA");}
+		  | expressao MENOS texpressao {geraCodigo(NULL, "SUBT");}
+		  | expressao OR texpressao {geraCodigo(NULL, "DISJ");}
+		  | texpressao
+;
+
+texpressao: texpressao ASTERISCO fexpressao {geraCodigo(NULL, "MULT");}
+		  | texpressao DIV fexpressao {geraCodigo(NULL, "DIVI");}
+		  | texpressao AND fexpressao {geraCodigo(NULL, "CONJ");}
+		  | fexpressao
+;
+
+fexpressao: IDENT {geraCodigo(NULL, "CRVL");}
+		  | ABRE_PARENTESES expressao FECHA_PARENTESES
+		  | NUMERO {geraCodigo(NULL, "CRCT");}
+;
+
+chamada_procedimento:
+;
+
+desvio:
+;
+
+comando_condicional: IF expressao THEN comando_composto
+;
+
+comando_repetitivo: WHILE
     { //gera
     }
     expressao DO comando_composto
 ;
 
-expressao: variavel {strcpy(elementoEsquerda, token); printf("ESQ: %s\n", elementoEsquerda)} simbolos 
+variavel:
+;
+
+expressao:
+;
+
+procedure:
+;
+
+function:
+;
+
+label:
+;
+
+num:
+;
+
+expressao: variavel {strcpy(elementoEsquerda, token); printf("ESQ: %s\n", elementoEsquerda)} simbolos
 ;
 
 variavel: IDENT {
                  tSimboloTs* t = buscaTS(token);
-                 if (t && t->categoria==TS_CAT_VS)
-                  geraCodigo(NULL, "CRVL", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
+                 if (t && t->categoria==TS_CAT_VS) {
+					snprintf(comando, "CRVL %d %d", t->nivel, t->categoriaTs.v->deslocamento);
+                    geraCodigo(NULL, comando);
+					memset(comando, 0, 64);
+				 }
                 }
-        | NUMERO {int val = atoi(token); geraCodigo(NULL, "CRCT", &val, NULL, NULL)}
+        | NUMERO
+			{int val = atoi(token);
+			 snprintf(comando, "CRCT %d", val);
+			 geraCodigo(NULL, "CRCT");
+			 memset(comando, 0, 64);
+			}
 ;
 
-simbolos: ATRIBUICAO simbolos PONTO_E_VIRGULA {
-                                               printf("ESQ: %s\n", elementoEsquerda);
-                                               tSimboloTs* t = buscaTS(elementoEsquerda);
-                                               if (t && t->categoria==TS_CAT_VS)
-                                                geraCodigo(NULL, "ARMZ", &t->nivel, &t->categoriaTs.v->deslocamento, NULL);
-                                              }
+simbolos: ATRIBUICAO simbolos PONTO_E_VIRGULA
+		{
+          printf("ESQ: %s\n", elementoEsquerda);
+          tSimboloTs* t = buscaTS(elementoEsquerda);
+          if (t && t->categoria==TS_CAT_VS) {
+			snprintf(comando, "ARMZ %d %d", t->nivel, t->categoriaTs.v->deslocamento);
+          	geraCodigo(NULL, comando);
+		 }
+        }
         | compara simbolos
 ;
 
-compara: IGUAL | MENOR | MENOR_IGUAL | MAIOR | MAIOR_IGUAL | DIF
+compara: IGUAL | MENOR | MENOR_IGUAL | MAIOR | MAIOR_IGUAL | DIFERENTE
 ;
 %%
 

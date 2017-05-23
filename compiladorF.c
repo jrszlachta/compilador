@@ -8,7 +8,7 @@
  *
  * -------------------------------------------------------------------
  *
- * Fun��es auxiliares ao compilador
+ * Funções auxiliares ao compilador
  *
  * ------------------------------------------------------------------- */
 
@@ -20,33 +20,19 @@
 extern list TS;
 
 /* -------------------------------------------------------------------
- *  vari�veis globais
+ *  variáveis globais
  * ------------------------------------------------------------------- */
 
 FILE* fp=NULL;
-void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3)
-{
+void geraCodigo (char* rot, char* comando) {
   if (fp == NULL) {
     fp = fopen ("MEPA", "w");
   }
   if (rot == NULL) {
-    fprintf(fp, "     %s", comando); fflush(fp);
+    fprintf(fp, "     %s\n", comando); fflush(fp);
   } else {
-    fprintf(fp, "%s: %s", rot, comando); fflush(fp);
+    fprintf(fp, "%s: %s \n", rot, comando); fflush(fp);
   }
-  if (arg1 != NULL)
-  {
-    fprintf(fp, " %d", *arg1);
-  }
-  if (arg2 != NULL)
-  {
-    fprintf(fp, ", %d", *arg2);
-  }
-  if (arg3 != NULL)
-  {
-    fprintf(fp, ", %d", *arg3);
-  }
-  fprintf(fp, "\n");
 }
 
 int imprimeErro ( char* erro ) {
