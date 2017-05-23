@@ -7,7 +7,7 @@
  *
  * -------------------------------------------------------------------
  *
- * Tipos, prot�tipos e vai�veis globais do compilador
+ * Tipos, protótipos e vaiáveis globais do compilador
  *
  * ------------------------------------------------------------------- */
 
@@ -34,8 +34,12 @@ typedef enum simbolos {
   simb_identificador, simb_numero,
   simb_ponto, simb_virgula, simb_ponto_e_virgula, simb_dois_pontos,
   simb_atribuicao, simb_abre_parenteses, simb_fecha_parenteses,
-  simb_while, simb_do, simb_if, simb_then, simb_else,
-  simb_igual, simb_menor, simb_menor_igual, simb_maior, simb_maior_igual, simb_dif,
+  simb_label, simb_tipo, simb_array,
+  simb_procedure, simb_function, simb_goto, simb_if, simb_then,
+  simb_else, simb_while, simb_do, simb_or, simb_and, simb_not,
+  simb_mais, simb_menos, simb_asterisco, simb_div, simb_igual,
+  simb_maior, simb_menor, simb_maior_igual, simb_menor_igual,
+  simb_diferente
 } simbolos;
 
 //Campos da tabela de símbolos para variáveis simples
@@ -88,10 +92,10 @@ extern int nl;
 simbolos simbolo, relacao;
 char token[TAM_TOKEN];
 
-
+int nivel_lexico;
 int yylex();
 void yyerror(const char *s);
-void geraCodigo (char* rot, char* comando, int* arg1, int* arg2, int* arg3);
+void geraCodigo (char* rot, char* comando);
 int imprimeErro(char* erro);
 
 list criaTS();
