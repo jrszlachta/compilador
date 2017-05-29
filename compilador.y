@@ -49,7 +49,7 @@ bloco       : {totalVar = 0;}
 
               comando_composto
               {
-				snprintf(comando, "DMEM %d", totalVar);
+				sprintf(comando, "DMEM %d", totalVar);
                 geraCodigo (NULL, "DMEM");
 				memset(comando, 0, 64);
               }
@@ -80,7 +80,7 @@ declara_var : {contVar = 0;}
               lista_id_var DOIS_PONTOS
               tipo
               {
-				snprintf(comando, "AMEM %d", contVar);
+				sprintf(comando, "AMEM %d", contVar);
                 geraCodigo (NULL, comando);
                 atualizaTS(contVar, token);
 				contVar = 0;
@@ -191,14 +191,14 @@ expressao: variavel {strcpy(elementoEsquerda, token); printf("ESQ: %s\n", elemen
 variavel: IDENT {
                  tSimboloTs* t = buscaTS(token);
                  if (t && t->categoria==TS_CAT_VS) {
-					snprintf(comando, "CRVL %d %d", t->nivel, t->categoriaTs.v->deslocamento);
+					sprintf(comando, "CRVL %d %d", t->nivel, t->categoriaTs.v->deslocamento);
                     geraCodigo(NULL, comando);
 					memset(comando, 0, 64);
 				 }
                 }
         | NUMERO
 			{int val = atoi(token);
-			 snprintf(comando, "CRCT %d", val);
+			 sprintf(comando, "CRCT %d", val);
 			 geraCodigo(NULL, "CRCT");
 			 memset(comando, 0, 64);
 			}
@@ -209,7 +209,7 @@ simbolos: ATRIBUICAO simbolos PONTO_E_VIRGULA
           printf("ESQ: %s\n", elementoEsquerda);
           tSimboloTs* t = buscaTS(elementoEsquerda);
           if (t && t->categoria==TS_CAT_VS) {
-			snprintf(comando, "ARMZ %d %d", t->nivel, t->categoriaTs.v->deslocamento);
+			sprintf(comando, "ARMZ %d %d", t->nivel, t->categoriaTs.v->deslocamento);
           	geraCodigo(NULL, comando);
 		 }
         }
