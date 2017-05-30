@@ -18,11 +18,11 @@ pulo_linha [\n]
 
 descarte [\t ]+
 
-ident [a-zAZ][a-zAZ1-9]*
-
 numero [0-9]+
 
 comentario "(*".*"*)"
+
+ident [a-zAZ][a-zAZ1-9]*
 
 %%
 
@@ -243,17 +243,16 @@ div { simbolo = simb_div;
 		return DIFERENTE;
 	}
 
-{ident} { simbolo = simb_identificador;
-          strncpy (token, yytext, TAM_TOKEN);
-          IMPRIME(" ident  ");
-          return IDENT;
-        }
-
 {numero} { simbolo = simb_numero;
 		   strncpy(token, yytext, TAM_TOKEN);
 		   IMPRIME(" numero ");
 		   return NUMERO;
 		}
 
-%%
+{ident} { simbolo = simb_identificador;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" ident  ");
+  return IDENT;
+}
 
+%%

@@ -41,37 +41,37 @@ programa:{
          }
 ;
 
-bloco       : {totalVar = 0;}
-              parte_declara_rotulos parte_vars parte_declara_procedimentos
-              {
+bloco: {totalVar = 0;}
+       parte_declara_rotulos parte_vars parte_declara_procedimentos
+       {
 
-              }
+       }
 
-              comando_composto
-              {
-				sprintf(comando, "DMEM %d", totalVar);
-                geraCodigo (NULL, "DMEM");
-				memset(comando, 0, 64);
-              }
+       comando_composto
+       {
+         sprintf(comando, "DMEM %d", totalVar);
+         geraCodigo (NULL, "DMEM");
+				 memset(comando, 0, 64);
+       }
 ;
 
 
 parte_vars: parte_declara_vars |
 ;
 
-parte_declara_vars: parte_declara_vars PONTO_E_VIRGULA declara_vars PONTO_E_VIRGULA | VAR declara_vars
+parte_declara_vars: parte_declara_vars declara_vars PONTO_E_VIRGULA | VAR declara_vars PONTO_E_VIRGULA
 ;
 
 
-declara_vars : {contVar = 0;}
+declara_vars: {contVar = 0;}
               lista_id_var DOIS_PONTOS
               tipo
               {
-				sprintf(comando, "AMEM %d", contVar);
+                sprintf(comando, "AMEM %d", contVar);
                 geraCodigo (NULL, comando);
                 atualizaTS(contVar, token);
-				contVar = 0;
-				memset(comando, 0, 64);
+				        contVar = 0;
+				        memset(comando, 0, 64);
               }
 ;
 
@@ -80,14 +80,14 @@ tipo: IDENT
 
 lista_id_var: lista_id_var VIRGULA IDENT
               { contVar++;
-				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
-				totalVar++;
-			  }
-            | IDENT
-			  { contVar++;
-			 	criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
-				totalVar++;
-			  }
+        				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+        				totalVar++;
+      			  }
+              | IDENT
+      			  { contVar++;
+        			 	criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+        				totalVar++;
+      			  }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
