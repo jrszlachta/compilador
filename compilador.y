@@ -42,7 +42,7 @@ programa:{
 ;
 
 bloco       : {totalVar = 0;}
-              parte_declara_rotulos parte_declara_vars parte_declara_procedimentos
+              parte_declara_rotulos parte_vars parte_declara_procedimentos
               {
 
               }
@@ -56,27 +56,14 @@ bloco       : {totalVar = 0;}
 ;
 
 
-
-
-parte_declara_vars:  var declara_vars
-                  |  parte_declara_vars var
+parte_vars: parte_declara_vars |
 ;
 
-parte_declara_rotulos: label num |
+parte_declara_vars: parte_declara_vars PONTO_E_VIRGULA declara_vars PONTO_E_VIRGULA | VAR declara_vars
 ;
 
-parte_declara_procedimentos: procedure | function |
-;
 
-var         : { } VAR declara_vars
-            |
-;
-
-declara_vars: declara_vars declara_var
-            | declara_var
-;
-
-declara_var : {contVar = 0;}
+declara_vars : {contVar = 0;}
               lista_id_var DOIS_PONTOS
               tipo
               {
@@ -86,7 +73,6 @@ declara_var : {contVar = 0;}
 				contVar = 0;
 				memset(comando, 0, 64);
               }
-              PONTO_E_VIRGULA
 ;
 
 tipo: IDENT
@@ -94,13 +80,13 @@ tipo: IDENT
 
 lista_id_var: lista_id_var VIRGULA IDENT
               { contVar++;
-				totalVar++;
 				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+				totalVar++;
 			  }
             | IDENT
 			  { contVar++;
-				totalVar++;
 			 	criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+				totalVar++;
 			  }
 ;
 
@@ -108,6 +94,11 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
+parte_declara_rotulos: label num |
+;
+
+parte_declara_procedimentos: procedure | function |
+;
 
 comando_composto: T_BEGIN comandos T_END
 				| comando

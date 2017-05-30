@@ -1,0 +1,2 @@
+ - fix deslocamento --1
+ - 
