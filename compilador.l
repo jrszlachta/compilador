@@ -111,6 +111,13 @@ type { simbolo = simb_tipo;
 		return TIPO;
 	}
 
+
+integer { simbolo = simb_integer;
+		  strncpy(token, yytext, TAM_TOKEN);
+		  IMPRIME(" integer ");
+		  return INTEGER;
+		}
+
 array { simbolo = simb_array;
 		strncpy(token, yytext, TAM_TOKEN);
 		IMPRIME("array ");
@@ -215,7 +222,7 @@ div { simbolo = simb_div;
 
 ">" { simbolo = simb_maior;
 		strncpy(token, yytext, TAM_TOKEN);
-		IMPRIME("maior ");
+		IMPRIME( "maior ");
 		return MAIOR;
 	}
 

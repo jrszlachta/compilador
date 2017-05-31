@@ -39,7 +39,7 @@ typedef enum simbolos {
   simb_else, simb_while, simb_do, simb_or, simb_and, simb_not,
   simb_mais, simb_menos, simb_asterisco, simb_div, simb_igual,
   simb_maior, simb_menor, simb_maior_igual, simb_menor_igual,
-  simb_diferente
+  simb_diferente, simb_integer
 } simbolos;
 
 //Campos da tabela de símbolos para variáveis simples
