@@ -15,5 +15,8 @@ y.tab.c: compilador.y compilador.h
 compilador.o : compilador.h compiladorF.c list.o
 	gcc -c compiladorF.c list.o -o compilador.o
 
+graph:
+	bison compilador.y -g
+
 clean :
-	rm -f compilador.tab.* lex.yy.c *.output *.o
+	rm -f compilador.tab.* lex.yy.c *.output *.o *.dot
