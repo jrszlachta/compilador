@@ -25,8 +25,12 @@ list TS;
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token LABEL TIPO ARRAY PROCEDURE FUNCTION
 %token GOTO IF THEN ELSE WHILE DO OR AND NOT
-%token MAIS MENOS ASTERISCO DIV IGUAL MAIOR MENOR
+%token IGUAL MAIOR MENOR
 %token MAIOR_IGUAL MENOR_IGUAL DIFERENTE INTEGER
+
+%left MAIS MENOS
+%left ASTERISCO DIV
+//%left ABRE_PARENTESES
 
 %%
 
@@ -140,6 +144,19 @@ expressao: NUMERO
              memset(comando, 0, 64);
              memset(elementoEsquerda, 0, TAM_TOKEN);
            }
+;
+
+e: e MAIS f {
+      //TODO: geraCodigo(NULL, "SOMA");
+    }
+ | e MENOS f {}
+ | e ASTERISCO f {}
+ | e DIV f {}
+ | f
+;
+
+f: IDENT {}
+ | ABRE_PARENTESES e FECHA_PARENTESES {}
 ;
 
 %%
