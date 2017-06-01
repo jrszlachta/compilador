@@ -135,8 +135,7 @@ expressao: NUMERO
              geraCodigo(NULL, comando);
              memset(comando, 0, 64);
              tSimboloTs* s = buscaTS(elementoEsquerda);
-             //TODO: Checar se tem virgula
-             sprintf(comando, "ARMZ %d %d", s->nivel, s->categoriaTs.v->deslocamento);
+             sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
              geraCodigo(NULL, comando);
              memset(comando, 0, 64);
              memset(elementoEsquerda, 0, TAM_TOKEN);
