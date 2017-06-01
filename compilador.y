@@ -1,6 +1,6 @@
 
-// Testar se funciona corretamente o empilhamento de parâmetros
-// passados por valor ou por referência.
+// Testar se funciona corretamente o empilhamento de parï¿½metros
+// passados por valor ou por referï¿½ncia.
 
 
 %{
@@ -19,7 +19,7 @@ list TS;
 
 %}
 
-%token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
+%token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token LABEL TIPO ARRAY PROCEDURE FUNCTION
@@ -29,34 +29,35 @@ list TS;
 
 %%
 
-programa    :{ 
+programa    :{
               geraCodigo (NULL, "INPP");
-			  nivelLexico = 0;
+			        nivelLexico = 0;
              }
-             PROGRAM IDENT 
+             PROGRAM IDENT
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO {
-             geraCodigo (NULL, "PARA"); 
+             bloco PONTO
+             {
+               geraCodigo (NULL, "PARA");
              }
 ;
 
 bloco       : {totalVar = 0;}
               parte_declara_vars
-              { 
+              {
               }
 
               comando_composto
-			  {
-				sprintf(comando, "DMEM %d", totalVar);
-				geraCodigo (NULL, comando);
-				memset(comando, 0, 64);
-			  } 
+      			  {
+        				sprintf(comando, "DMEM %d", totalVar);
+        				geraCodigo (NULL, comando);
+        				memset(comando, 0, 64);
+      			  }
               ;
 
 
 
 
-parte_declara_vars:  var 
+parte_declara_vars:  var
 ;
 
 
@@ -64,7 +65,7 @@ var         : VAR declara_vars
             |
 ;
 
-declara_vars: declara_vars declara_var PONTO_E_VIRGULA 
+declara_vars: declara_vars declara_var PONTO_E_VIRGULA
             | declara_var PONTO_E_VIRGULA
 ;
 
@@ -72,40 +73,39 @@ declara_var : { contVar = 0; }
               lista_id_var DOIS_PONTOS
               tipo
               {
-				sprintf(comando, "AMEM %d", contVar);
-				geraCodigo(NULL, comando);
-				atualizaTS(contVar, token);
-				contVar = 0;
-				memset(comando, 0, 64);
+                sprintf(comando, "AMEM %d", contVar);
+                geraCodigo(NULL, comando);
+                atualizaTS(contVar, token);
+                contVar = 0;
+                memset(comando, 0, 64);
               }
-              PONTO_E_VIRGULA
 ;
 
 tipo        : INTEGER
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT 
+lista_id_var: lista_id_var VIRGULA IDENT
               {
-				contVar++;
-				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
-				totalVar++;
-			  }
-            | IDENT 
-			  {
-				contVar++;
-				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
-				totalVar++;
-			  }
+        				contVar++;
+        				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+        				totalVar++;
+			        }
+              | IDENT
+			        {
+        				contVar++;
+        				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
+        				totalVar++;
+			        }
 ;
 
-lista_idents: lista_idents VIRGULA IDENT  
+lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
 
-comando_composto: T_BEGIN comandos T_END 
+comando_composto: T_BEGIN comandos T_END
 
-comandos:    
+comandos:
 ;
 
 
@@ -158,7 +158,7 @@ int main (int argc, char** argv) {
  	yyin=fp;
  	yyparse();
 
- 	printf("\n\nTABELA DE SÍMBOLOS\n");
+ 	printf("\n\nTABELA DE Sï¿½MBOLOS\n");
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);
@@ -167,4 +167,3 @@ int main (int argc, char** argv) {
 
 	return 0;
 }
-
