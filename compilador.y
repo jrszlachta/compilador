@@ -25,8 +25,9 @@ list TS;
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token LABEL TIPO ARRAY PROCEDURE FUNCTION
 %token GOTO IF THEN ELSE WHILE DO OR AND NOT
-%token MAIS MENOS ASTERISCO DIV IGUAL MAIOR MENOR
+%token IGUAL MAIOR MENOR MAIS MENOS ASTERISCO DIV
 %token MAIOR_IGUAL MENOR_IGUAL DIFERENTE INTEGER
+
 
 %%
 
@@ -129,7 +130,7 @@ variavel: IDENT
           }
 ;
 
-expressao: NUMERO
+/*expressao: NUMERO
            {
              sprintf(comando, "CRCT %s", token);
              geraCodigo(NULL, comando);
@@ -140,6 +141,55 @@ expressao: NUMERO
              memset(comando, 0, 64);
              memset(elementoEsquerda, 0, TAM_TOKEN);
            }
+;*/
+
+expressao: e {
+		tSimboloTs *s = buscaTS(elementoEsquerda);
+		sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+		memset(elementoEsquerda, 0, TAM_TOKEN);
+	}
+;
+
+e: e MAIS f {
+		sprintf(comando, "SOMA");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+    }
+ | e MENOS f {
+		sprintf(comando, "SUBT");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+ | f
+;
+
+f: f ASTERISCO t {
+		sprintf(comando, "MULT");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+ | f DIV t {
+		sprintf(comando, "DIVI");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+ | t
+;
+
+t: IDENT {
+		tSimboloTs *s = buscaTS(token);
+		sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+ 	}
+ | NUMERO {
+		sprintf(comando, "CRCT %s", token);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+ | ABRE_PARENTESES e FECHA_PARENTESES
 ;
 
 %%
