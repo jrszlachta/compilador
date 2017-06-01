@@ -14,7 +14,7 @@
 int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
-char* elementoEsquerda;
+char elementoEsquerda[TAM_TOKEN];
 char comando[64];
 list TS;
 
@@ -107,8 +107,41 @@ lista_idents: lista_idents VIRGULA IDENT
 comando_composto: T_BEGIN comandos T_END
 
 comandos:
+          | comandos comando
+          | comando
 ;
 
+comando: numero comando_sem_rotulo
+;
+
+numero: NUMERO DOIS_PONTOS |
+;
+
+comando_sem_rotulo: atribuicao
+;
+
+atribuicao: variavel ATRIBUICAO expressao PONTO_E_VIRGULA
+;
+
+variavel: IDENT
+          {
+            sprintf(elementoEsquerda, "%s", token);
+          }
+;
+
+expressao: NUMERO
+           {
+             sprintf(comando, "CRCT %s", token);
+             geraCodigo(NULL, comando);
+             memset(comando, 0, 64);
+             tSimboloTs* s = buscaTS(elementoEsquerda);
+             //TODO: Checar se tem virgula
+             sprintf(comando, "ARMZ %d %d", s->nivel, s->categoriaTs.v->deslocamento);
+             geraCodigo(NULL, comando);
+             memset(comando, 0, 64);
+             memset(elementoEsquerda, 0, TAM_TOKEN);
+           }
+;
 
 %%
 
@@ -132,7 +165,6 @@ int main (int argc, char** argv) {
    	extern FILE* yyin;
 
 	TS = criaTS();
-	elementoEsquerda = (char*)malloc(sizeof(char)*TAM_TOKEN);
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);
