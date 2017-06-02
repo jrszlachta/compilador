@@ -14,6 +14,8 @@
 int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
+int relacaoDada;
+char simboloEsquerda[4];
 char elementoEsquerda[TAM_TOKEN];
 char comando[64];
 list TS;
@@ -150,6 +152,19 @@ expressao: e {
 		memset(comando, 0, 64);
 		memset(elementoEsquerda, 0, TAM_TOKEN);
 	}
+	| e relacao e {
+		geraCodigo(NULL, simboloEsquerda);
+		memset(simboloEsquerda, 0, 64);
+	}
+;
+
+relacao: IGUAL {sprintf(simboloEsquerda, "CMIG");}
+	   | MAIOR {sprintf(simboloEsquerda, "CMMA");}
+	   | MENOR {sprintf(simboloEsquerda, "CMME");}
+	   | MAIOR_IGUAL {sprintf(simboloEsquerda, "CMAG");}
+	   | MENOR_IGUAL {sprintf(simboloEsquerda, "CMEG");}
+	   | DIFERENTE {sprintf(simboloEsquerda, "CMDG");}
+
 ;
 
 e: e MAIS f {
