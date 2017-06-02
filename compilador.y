@@ -26,11 +26,13 @@ list TS;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token LABEL TIPO ARRAY PROCEDURE FUNCTION
-%token GOTO IF THEN ELSE WHILE DO OR AND NOT
+%token GOTO IF THEN ELSE WHILE DO NOT
 %token IGUAL MAIOR MENOR MAIS MENOS ASTERISCO DIV
 %token MAIOR_IGUAL MENOR_IGUAL DIFERENTE INTEGER
 
-
+%left OR
+%left AND
+%left ABRE_PARENTESES
 %%
 
 programa    :{
@@ -152,9 +154,23 @@ expressao: e {
 		memset(comando, 0, 64);
 		memset(elementoEsquerda, 0, TAM_TOKEN);
 	}
+	| avalia_expressao
+;
+
+avalia_expressao: avalia_expressao AND avalia_expressao {
+		sprintf(comando, "CONJ");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+	| avalia_expressao OR avalia_expressao {
+		sprintf(comando, "DISJ");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+	| ABRE_PARENTESES avalia_expressao FECHA_PARENTESES
 	| e relacao e {
 		geraCodigo(NULL, simboloEsquerda);
-		memset(simboloEsquerda, 0, 64);
+		memset(simboloEsquerda, 0, 4);
 	}
 ;
 
