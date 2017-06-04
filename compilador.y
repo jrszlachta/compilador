@@ -14,9 +14,12 @@
 int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
+int relacaoDada;
+char simboloEsquerda[4];
 char elementoEsquerda[TAM_TOKEN];
 char comando[64];
 list TS;
+list rotulos;
 
 %}
 
@@ -24,11 +27,13 @@ list TS;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token LABEL TIPO ARRAY PROCEDURE FUNCTION
-%token GOTO IF THEN ELSE WHILE DO OR AND NOT
+%token GOTO IF THEN ELSE WHILE DO NOT
 %token IGUAL MAIOR MENOR MAIS MENOS ASTERISCO DIV
 %token MAIOR_IGUAL MENOR_IGUAL DIFERENTE INTEGER
 
-
+%left OR
+%left AND
+%left ABRE_PARENTESES
 %%
 
 programa    :{
@@ -107,9 +112,9 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_composto: T_BEGIN comandos T_END
 
-comandos:
-          | comandos comando
+comandos: comandos comando
           | comando
+          |
 ;
 
 comando: numero comando_sem_rotulo
@@ -118,7 +123,7 @@ comando: numero comando_sem_rotulo
 numero: NUMERO DOIS_PONTOS |
 ;
 
-comando_sem_rotulo: atribuicao
+comando_sem_rotulo: atribuicao | comando_repetitivo |
 ;
 
 atribuicao: variavel ATRIBUICAO expressao PONTO_E_VIRGULA
@@ -150,6 +155,32 @@ expressao: e {
 		memset(comando, 0, 64);
 		memset(elementoEsquerda, 0, TAM_TOKEN);
 	}
+;
+
+avalia_expressao: avalia_expressao AND avalia_expressao {
+		sprintf(comando, "CONJ");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+	| avalia_expressao OR avalia_expressao {
+		sprintf(comando, "DISJ");
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+	}
+	| ABRE_PARENTESES avalia_expressao FECHA_PARENTESES
+	| e relacao e {
+		geraCodigo(NULL, simboloEsquerda);
+		memset(simboloEsquerda, 0, 4);
+	}
+;
+
+relacao: IGUAL {sprintf(simboloEsquerda, "CMIG");}
+	   | MAIOR {sprintf(simboloEsquerda, "CMMA");}
+	   | MENOR {sprintf(simboloEsquerda, "CMME");}
+	   | MAIOR_IGUAL {sprintf(simboloEsquerda, "CMAG");}
+	   | MENOR_IGUAL {sprintf(simboloEsquerda, "CMEG");}
+	   | DIFERENTE {sprintf(simboloEsquerda, "CMDG");}
+
 ;
 
 e: e MAIS f {
@@ -192,13 +223,51 @@ t: IDENT {
  | ABRE_PARENTESES e FECHA_PARENTESES
 ;
 
+comando_repetitivo: WHILE
+  {
+    char *r0 = geraRotulo();
+    list_push(r0, rotulos);
+    geraCodigo(r0, "NADA");
+  }
+avalia_expressao
+  {
+    char *r1 = geraRotulo();
+    list_push(r1, rotulos);
+    sprintf(comando, "DSVF %s", r1);
+    geraCodigo(NULL, comando);
+    memset(comando, 0, 64);
+  }
+  comando_repetitivo_do
+;
+comando_repetitivo_do:
+  DO T_BEGIN comandos T_END PONTO_E_VIRGULA
+  {
+    char *r1 = (char *) list_value(list_pop(rotulos));
+    char *r0 = (char *) list_value(list_pop(rotulos));
+    sprintf(comando, "DSVS %s", r0);
+    geraCodigo(NULL, comando);
+    memset(comando, 0, 64);
+    geraCodigo(r1, "NADA");
+  }
+  | DO comando {
+    char *r1 = (char *) list_value(list_pop(rotulos));
+    char *r0 = (char *) list_value(list_pop(rotulos));
+    sprintf(comando, "DSVS %s", r0);
+    geraCodigo(NULL, comando);
+    memset(comando, 0, 64);
+    geraCodigo(r1, "NADA");
+  }
+;
+
 %%
+
+int yylex();
 
 char* geraRotulo()
 {
 	char* rot;
 	rot = (char *) malloc(sizeof(char)*10);
-	sprintf(rot, "R%5.0d", maxRotulo++);
+	sprintf(rot, "R%2.0d", maxRotulo++);
 	for (int i=0;i<9;++i)
  	{
   		if (rot[i]==' ')
@@ -207,13 +276,12 @@ char* geraRotulo()
 	return rot;
 }
 
-int yylex();
-
 int main (int argc, char** argv) {
 	FILE* fp;
    	extern FILE* yyin;
 
 	TS = criaTS();
+  rotulos = list_new();
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);
@@ -240,7 +308,7 @@ int main (int argc, char** argv) {
  	yyin=fp;
  	yyparse();
 
- 	printf("\n\nTABELA DE S�MBOLOS\n");
+ 	printf("\n\nTABELA DE SÍMBOLOS\n");
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);

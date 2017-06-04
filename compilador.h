@@ -95,6 +95,7 @@ char token[TAM_TOKEN];
 int nivel_lexico;
 int yylex();
 void yyerror(const char *s);
+char *geraRotulo(void);
 void geraCodigo (char* rot, char* comando);
 int imprimeErro(char* erro);
 
