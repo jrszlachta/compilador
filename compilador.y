@@ -259,6 +259,29 @@ comando_repetitivo_do:
   }
 ;
 
+/*comando_condicional:
+  if_then cond_else
+  {
+    em_if_finaliza ();
+  }
+;
+
+if_then:
+  IF expressao
+  {
+    em_if_apos_expr ();
+  }
+   THEN comando_sem_rotulo
+  {
+    em_if_apos_then ();
+  }
+;
+
+cond_else:
+  ELSE comando_sem_rotulo
+  | %prec LOWER_THAN_ELSE
+;*/
+
 %%
 
 int yylex();
