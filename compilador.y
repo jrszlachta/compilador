@@ -27,13 +27,17 @@ list rotulos;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT NUMERO ATRIBUICAO
 %token LABEL TIPO ARRAY PROCEDURE FUNCTION
-%token GOTO IF THEN ELSE WHILE DO NOT
+%token GOTO IF THEN WHILE DO NOT
 %token IGUAL MAIOR MENOR MAIS MENOS ASTERISCO DIV
 %token MAIOR_IGUAL MENOR_IGUAL DIFERENTE INTEGER
+%token READ WRITE
 
 %left OR
 %left AND
 %left ABRE_PARENTESES
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 %%
 
 programa    :{
@@ -112,7 +116,7 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_composto: T_BEGIN comandos T_END
 
-comandos: comandos comando
+comandos: comandos PONTO_E_VIRGULA comando
           | comando
           |
 ;
@@ -123,10 +127,35 @@ comando: numero comando_sem_rotulo
 numero: NUMERO DOIS_PONTOS |
 ;
 
-comando_sem_rotulo: atribuicao | comando_repetitivo |
+comando_sem_rotulo: atribuicao | comando_repetitivo | comando_condicional | leitura | escrita
 ;
 
-atribuicao: variavel ATRIBUICAO expressao PONTO_E_VIRGULA
+leitura: READ ABRE_PARENTESES IDENT
+	{
+		geraCodigo(NULL, "LEIT");
+		tSimboloTs *s = buscaTS(token);
+		sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+		memset(elementoEsquerda, 0, TAM_TOKEN);
+	}
+	FECHA_PARENTESES
+;
+
+escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
+;
+
+lista_write: lista_write VIRGULA e
+	{
+		geraCodigo(NULL, "IMPR");
+	}
+	| e
+	{
+		geraCodigo(NULL, "IMPR");
+	}
+;
+
+atribuicao: variavel ATRIBUICAO expressao
 ;
 
 variavel: IDENT
@@ -240,7 +269,7 @@ avalia_expressao
   comando_repetitivo_do
 ;
 comando_repetitivo_do:
-  DO T_BEGIN comandos T_END PONTO_E_VIRGULA
+  DO comando_composto
   {
     char *r1 = (char *) list_value(list_pop(rotulos));
     char *r0 = (char *) list_value(list_pop(rotulos));
@@ -259,28 +288,45 @@ comando_repetitivo_do:
   }
 ;
 
-/*comando_condicional:
+comando_condicional:
   if_then cond_else
   {
-    em_if_finaliza ();
+    //em_if_finaliza i();
   }
 ;
 
 if_then:
-  IF expressao
+  IF avalia_expressao
   {
-    em_if_apos_expr ();
+    //em_if_apos_expr ();
+	char *r0 = geraRotulo();
+	list_push(r0, rotulos);
+	sprintf(comando, "DSVF %s", r0);
+	geraCodigo(NULL, comando);
+	memset(comando, 0, 64);
   }
-   THEN comando_sem_rotulo
+   THEN comando_composto
   {
-    em_if_apos_then ();
+    //em_if_apos_then ();
+	char *r0 = (char *) list_value(list_pop(rotulos));
+	geraCodigo(r0, "NADA");
   }
 ;
 
-cond_else:
-  ELSE comando_sem_rotulo
+cond_else: {
+	char *r1 = geraRotulo();
+	list_push(r1, rotulos);
+	sprintf(comando, "DSVS %s", r1);
+	geraCodigo(NULL, comando);
+	memset(comando, 0, 64);
+	}
+  ELSE comando_composto
+	{
+		char *r1 = (char *) list_value(list_pop(rotulos));
+		geraCodigo(r1, "NADA");
+	}
   | %prec LOWER_THAN_ELSE
-;*/
+;
 
 %%
 

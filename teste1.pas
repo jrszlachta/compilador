@@ -3,5 +3,5 @@ var m,n :  integer;
 	   p : integer;
 begin
 	m := n;
-	p := 0;
+	p := 0
 end.

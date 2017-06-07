@@ -7,6 +7,6 @@ begin
   begin
     while m < 0 do
       o := 1;
-    p := m + n * (n);
-  end;
+    p := m + n * (n)
+  end
 end.
