@@ -15,11 +15,14 @@ int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
 int relacaoDada;
+int nParam;
 char simboloEsquerda[4];
 char elementoEsquerda[TAM_TOKEN];
 char comando[64];
+tSimboloTs *tAtual;
 list TS;
 list rotulos;
+list totalVars;
 
 %}
 
@@ -54,14 +57,30 @@ programa    :{
 
 bloco       : {totalVar = 0;}
               parte_declara_vars
+			  {
+				int *aux = (int *) malloc(sizeof(int));
+				*aux = totalVar;
+				list_push(aux, totalVars);
+				char *r0 = geraRotulo();
+				list_push(r0, rotulos);
+				sprintf(comando, "DSVS %s", r0);
+				geraCodigo(NULL, comando);
+				memset(comando, 0, 64);
+			  }
+			  parte_declara_subrotinas
               {
+				char *r0 = (char *) list_value(list_pop(rotulos));
+				geraCodigo(r0, "NADA");
+				free(r0);
               }
 
               comando_composto
       			  {
-        				sprintf(comando, "DMEM %d", totalVar);
+						int *aux = (int *) list_value(list_pop(totalVars));
+        				sprintf(comando, "DMEM %d", *aux);
         				geraCodigo (NULL, comando);
         				memset(comando, 0, 64);
+						free(aux);
       			  }
               ;
 
@@ -69,6 +88,47 @@ bloco       : {totalVar = 0;}
 
 
 parte_declara_vars:  var
+;
+
+parte_declara_subrotinas: parte_declara_subrotinas declara_procedimento
+						| parte_declara_subrotinas declara_funcao
+						| declara_procedimento
+						| declara_funcao
+;
+
+declara_procedimento: PROCEDURE IDENT
+	{
+		nParam = 0;
+		nivelLexico++;
+		char *r0 = geraRotulo();
+		list_push(r0, rotulos);
+		sprintf(comando, "ENPR %d", nivelLexico);
+		geraCodigo(r0, comando);
+		memset(comando, 0, 64);
+		tSimboloTs* t = criaSimboloTS(token, TS_CAT_CP, nivelLexico);
+		tAtual = t;
+	}
+	parametros
+	{
+		char *r0 = (char *) list_value(list_pop(rotulos));
+		atualizaSimboloTS_CP(tAtual, r0, nivelLexico, nParam, NULL);
+		free(r0);
+	}
+	PONTO_E_VIRGULA
+	bloco
+	{
+		sprintf(comando, "RTPR %d, %d", nivelLexico, 0);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+		nivelLexico--;
+	}
+	PONTO_E_VIRGULA
+;
+
+declara_funcao:
+;
+
+parametros:
 ;
 
 
@@ -115,6 +175,7 @@ lista_idents: lista_idents VIRGULA IDENT
 
 
 comando_composto: T_BEGIN comandos T_END
+;
 
 comandos: comandos PONTO_E_VIRGULA comando
           | comando
@@ -127,7 +188,7 @@ comando: numero comando_sem_rotulo
 numero: NUMERO DOIS_PONTOS |
 ;
 
-comando_sem_rotulo: atribuicao | comando_repetitivo | comando_condicional | leitura | escrita
+comando_sem_rotulo: atr_ou_proc | comando_repetitivo | comando_condicional | leitura | escrita
 ;
 
 leitura: READ ABRE_PARENTESES IDENT
@@ -155,13 +216,21 @@ lista_write: lista_write VIRGULA e
 	}
 ;
 
-atribuicao: variavel ATRIBUICAO expressao
+atr_ou_proc: IDENT {sprintf(elementoEsquerda, "%s", token);} atr_ou_proc_cont
 ;
 
-variavel: IDENT
-          {
-            sprintf(elementoEsquerda, "%s", token);
-          }
+atr_ou_proc_cont: ATRIBUICAO expressao
+		   | ABRE_PARENTESES alguma_coisa FECHA_PARENTESES
+		   | {
+				tSimboloTs *t = buscaTS(elementoEsquerda);
+				memset(elementoEsquerda, 0, TAM_TOKEN);
+				sprintf(comando, "CHPR %s, %d", t->categoriaTs.c->rotulo, nivelLexico);
+				geraCodigo(NULL, comando);
+				memset(comando, 0, 64);
+			 }
+;
+
+alguma_coisa:
 ;
 
 /*expressao: NUMERO
@@ -277,6 +346,8 @@ comando_repetitivo_do:
     geraCodigo(NULL, comando);
     memset(comando, 0, 64);
     geraCodigo(r1, "NADA");
+	free(r0);
+	free(r1);
   }
   | DO comando {
     char *r1 = (char *) list_value(list_pop(rotulos));
@@ -285,14 +356,18 @@ comando_repetitivo_do:
     geraCodigo(NULL, comando);
     memset(comando, 0, 64);
     geraCodigo(r1, "NADA");
+	free(r0);
+	free(r1);
   }
 ;
 
 comando_condicional:
   if_then cond_else
-  {
-    //em_if_finaliza i();
-  }
+	{
+		char *r0 = (char *) list_value(list_pop(rotulos));
+		geraCodigo(r0, "NADA");
+		free(r0);
+	}
 ;
 
 if_then:
@@ -300,32 +375,34 @@ if_then:
   {
     //em_if_apos_expr ();
 	char *r0 = geraRotulo();
+	char *r1 = geraRotulo();
 	list_push(r0, rotulos);
-	sprintf(comando, "DSVF %s", r0);
+	list_push(r1, rotulos);
+	sprintf(comando, "DSVF %s", r1);
 	geraCodigo(NULL, comando);
 	memset(comando, 0, 64);
   }
-   THEN comando_composto
+   THEN then_comando
   {
-    //em_if_apos_then ();
+	char *r1 = (char *) list_value(list_pop(rotulos));
 	char *r0 = (char *) list_value(list_pop(rotulos));
-	geraCodigo(r0, "NADA");
+	list_push(r0, rotulos);
+	sprintf(comando, "DSVS %s", r0);
+	geraCodigo(NULL, comando);
+	memset(comando, 0, 64);
+	geraCodigo(r1, "NADA");
+	free(r1);
   }
 ;
 
-cond_else: {
-	char *r1 = geraRotulo();
-	list_push(r1, rotulos);
-	sprintf(comando, "DSVS %s", r1);
-	geraCodigo(NULL, comando);
-	memset(comando, 0, 64);
-	}
-  ELSE comando_composto
-	{
-		char *r1 = (char *) list_value(list_pop(rotulos));
-		geraCodigo(r1, "NADA");
-	}
+then_comando: comando_composto | comando
+;
+
+cond_else: ELSE else_comando
   | %prec LOWER_THAN_ELSE
+;
+
+else_comando: comando_composto | comando
 ;
 
 %%
@@ -350,7 +427,8 @@ int main (int argc, char** argv) {
    	extern FILE* yyin;
 
 	TS = criaTS();
-  rotulos = list_new();
+	rotulos = list_new();
+	totalVars = list_new();
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);

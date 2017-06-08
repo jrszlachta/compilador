@@ -47,7 +47,8 @@ tSimboloTs* criaSimboloTS(char* rot, int categoria, int nivel)
  tSimboloTs* t = (tSimboloTs*)malloc(sizeof(tSimboloTs));
  if (t)
  {
-  t->ident = rot;
+  t->ident = (char*)malloc(sizeof(char)*TAM_TOKEN);
+  strcpy(t->ident, rot);
   t->categoria = categoria;
   t->nivel = nivel;
 
@@ -101,7 +102,8 @@ void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, i
  if (s->categoria==TS_CAT_CP)
  {
   s->categoriaTs.c = (tCpTs*)malloc(sizeof(tCpTs));
-  s->categoriaTs.c->rotulo = rotulo;
+  s->categoriaTs.c->rotulo = (char *) malloc(sizeof(char)*10);
+  strcpy(s->categoriaTs.c->rotulo, rotulo);
   s->categoriaTs.c->nivel = nivel;
   s->categoriaTs.c->nParams = nParams;
   s->categoriaTs.c->tipoPassagem = tipoPassagem;

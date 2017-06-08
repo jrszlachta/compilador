@@ -20,6 +20,8 @@
 #define TS_CAT_PF 1
 //Categoria da tabela de símbolos: Procedimento
 #define TS_CAT_CP 2
+//Categoria da tabela de símbolos: Função
+#define TS_CAT_CF 3
 //Tipo Integer
 #define TS_TIP_INT 0
 //Tipo Boolean
@@ -65,6 +67,13 @@ typedef struct cpTs
  int* tipoPassagem;
 }tCpTs;
 
+//Campos da tabela de símbolos para chamada de função
+typedef struct cfTs
+{
+  tVsTs *v;
+  tCpTs *p;
+}tCfTs;
+
 typedef struct simboloTs
 {
  char* ident;
@@ -75,6 +84,7 @@ typedef struct simboloTs
   tVsTs* v;
   tPfTs* p;
   tCpTs* c;
+  tCfTs* f;
  }categoriaTs;
 }tSimboloTs;
 
