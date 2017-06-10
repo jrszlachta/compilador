@@ -15,8 +15,9 @@ int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
 int relacaoDada;
-int nParam, nParam_local;
-int tem_var;
+int nParam, nParam_local, nParam_chamada;
+int tipo_param;
+int ch_proc;
 char simboloEsquerda[4];
 char elementoEsquerda[TAM_TOKEN];
 char comando[64];
@@ -114,7 +115,15 @@ declara_procedimento: PROCEDURE IDENT
 	parametros
 	{
 		char *r0 = (char *) list_value(list_pop(rotulos));
-		atualizaSimboloTS_CP(tAtual, r0, nivelLexico, nParam, NULL);
+		int *tipo;
+		list tipoParams = list_new();
+		for (node n = list_first(lista_param); n; n = list_next(n)) {
+			tipo = (int *) malloc(sizeof(int));
+			tSimboloTs *t = list_value(n);
+			*tipo = t->categoriaTs.p->tipoPassagem;
+			list_push(tipo, tipoParams);
+		}
+		atualizaSimboloTS_CP(tAtual, r0, nivelLexico, nParam, tipoParams);
 		free(r0);
 		int *aux = (int *) malloc(sizeof(int));
 		*aux = nParam;
@@ -164,7 +173,7 @@ lista_param: tem_var lista_id_param DOIS_PONTOS tipo
 		   }
 ;
 
-tem_var: VAR {tem_var = 1;} | {tem_var = 0;}
+tem_var: VAR {tipo_param = TS_PAR_REF;} | {tipo_param = TS_PAR_VAL;}
 ;
 
 var         : VAR declara_vars
@@ -208,17 +217,15 @@ lista_id_param: lista_id_param VIRGULA IDENT
               {
         				nParam++;
 						nParam_local++;
-        				tSimboloTs *t = criaSimboloTS_PF(token, TS_CAT_PF, nivelLexico, TS_PAR_VAL);
+        				tSimboloTs *t = criaSimboloTS_PF(token, TS_CAT_PF, nivelLexico, tipo_param);
 						list_push(t, lista_param);
-						// TODO: when VAR
 			  }
 			  | IDENT
               {
         				nParam++;
 						nParam_local++;
-        				tSimboloTs *t = criaSimboloTS_PF(token, TS_CAT_PF, nivelLexico, TS_PAR_VAL);
+        				tSimboloTs *t = criaSimboloTS_PF(token, TS_CAT_PF, nivelLexico, tipo_param);
 						list_push(t, lista_param);
-						// TODO: when VAR
 			  }
 ;
 
@@ -273,13 +280,14 @@ atr_ou_proc: IDENT {sprintf(elementoEsquerda, "%s", token);} atr_ou_proc_cont
 ;
 
 atr_ou_proc_cont: ATRIBUICAO expressao
-		   | ABRE_PARENTESES alguma_coisa FECHA_PARENTESES
+		   | ABRE_PARENTESES {ch_proc = 1; nParam_chamada = 0;} alguma_coisa FECHA_PARENTESES
 			 {
 				tSimboloTs *t = buscaTS(elementoEsquerda);
 				memset(elementoEsquerda, 0, TAM_TOKEN);
 				sprintf(comando, "CHPR %s, %d", t->categoriaTs.c->rotulo, nivelLexico);
 				geraCodigo(NULL, comando);
 				memset(comando, 0, 64);
+				ch_proc = 0;
 			 }
 		   | {
 				tSimboloTs *t = buscaTS(elementoEsquerda);
@@ -290,7 +298,7 @@ atr_ou_proc_cont: ATRIBUICAO expressao
 			 }
 ;
 
-alguma_coisa: alguma_coisa VIRGULA e | e
+alguma_coisa: alguma_coisa VIRGULA e {nParam_chamada++;} | e {nParam_chamada++;}
 ;
 
 /*expressao: NUMERO
@@ -370,7 +378,17 @@ f: f ASTERISCO t {
 
 t: IDENT {
 		tSimboloTs *s = buscaTS(token);
-		sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		if (s->categoria == TS_CAT_VS) {
+			sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		}
+		else if (s->categoria == TS_CAT_PF) {
+			if (s->categoriaTs.p->tipoPassagem == TS_PAR_VAL) {
+
+			}
+			else if (s->categoriaTs.p->tipoPassagem == TS_PAR_REF) {
+				
+			}
+		}
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
  	}

@@ -112,7 +112,7 @@ void atualizaSimboloTS_PF(list l, int tipo, int nparam)
   }
 }
 
-void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, int* tipoPassagem)
+void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, list tipoPassagem)
 {
  if (s->categoria==TS_CAT_CP)
  {
@@ -198,12 +198,17 @@ void imprimeSimboloTS(tSimboloTs* t)
    printf("\nSimbolo TS:\nRot\tCat\tNiv\tRot\tNiv\tnParams\n%s\t%s\t%d\t%s\t%d\t%d\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.c->rotulo, t->categoriaTs.c->nivel, t->categoriaTs.c->nParams);
    if (t->categoriaTs.c->tipoPassagem!=NULL)
    {
-    printf("Tipos Passagem: [%d", t->categoriaTs.c->tipoPassagem[0]);
-    for (int i=1;i<t->categoriaTs.c->nParams;++i)
-     printf(", %d", t->categoriaTs.c->tipoPassagem[i]);
-    printf("]\n\n");
+	node n = list_first(t->categoriaTs.c->tipoPassagem);
+	int *aux = (int*) list_value(n);
+    printf("Tipos Passagem: [%d", *aux);
+	n = list_next(n);
+    for (; n; n = list_next(n)) {
+	 aux = (int *) list_value(n);
+     printf(", %d", *aux);
    }
+   printf("]\n\n");
   break;
+  }
  }
 }
 
