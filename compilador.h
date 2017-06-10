@@ -56,6 +56,7 @@ typedef struct pfTs
 {
  int deslocamento;
  int tipoPassagem;
+ int tipo;
 }tPfTs;
 
 //Campos da tabela de símbolos para chamada de procedimentos
@@ -113,9 +114,10 @@ list criaTS();
 void imprimeSimboloTS(tSimboloTs* t);
 tSimboloTs* criaSimboloTS(char* rot, int categoria, int nivel);
 tSimboloTs* criaSimboloTS_VS(char *rot, int categoria, int nivel, int deslocamento);
+tSimboloTs* criaSimboloTS_PF(char *rot, int categoria, int nivel, int tipoPassagem);
 
 void atualizaSimboloTS_VS(tSimboloTs* s, int tipo);
-void atualizaSimboloTS_PF(tSimboloTs* s, int deslocamento, int tipoPassagem);
+void atualizaSimboloTS_PF(list l, int tipo, int nParam);
 void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, int* tipoPassagem);
 
 int insereTS(tSimboloTs* s);

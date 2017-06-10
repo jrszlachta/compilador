@@ -15,7 +15,8 @@ int num_vars, contVar, totalVar;
 int maxRotulo;
 int nivelLexico, deslocamento;
 int relacaoDada;
-int nParam;
+int nParam, nParam_local;
+int tem_var;
 char simboloEsquerda[4];
 char elementoEsquerda[TAM_TOKEN];
 char comando[64];
@@ -23,6 +24,7 @@ tSimboloTs *tAtual;
 list TS;
 list rotulos;
 list totalVars;
+list nParams, lista_param;
 
 %}
 
@@ -100,6 +102,7 @@ declara_procedimento: PROCEDURE IDENT
 	{
 		nParam = 0;
 		nivelLexico++;
+		lista_param = list_new();
 		char *r0 = geraRotulo();
 		list_push(r0, rotulos);
 		sprintf(comando, "ENPR %d", nivelLexico);
@@ -113,24 +116,56 @@ declara_procedimento: PROCEDURE IDENT
 		char *r0 = (char *) list_value(list_pop(rotulos));
 		atualizaSimboloTS_CP(tAtual, r0, nivelLexico, nParam, NULL);
 		free(r0);
+		int *aux = (int *) malloc(sizeof(int));
+		*aux = nParam;
+		list_push(aux, nParams);
 	}
 	PONTO_E_VIRGULA
 	bloco
 	{
-		sprintf(comando, "RTPR %d, %d", nivelLexico, 0);
+		int *aux = (int *) list_value(list_pop(nParams));
+		sprintf(comando, "RTPR %d, %d", nivelLexico, *aux);
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
 		nivelLexico--;
 	}
 	PONTO_E_VIRGULA
+	{
+		list_free(lista_param, NULL);
+	}
 ;
 
 declara_funcao:
 ;
 
-parametros:
+parametros: ABRE_PARENTESES secao_parametros FECHA_PARENTESES
+		  {
+			int i = 0;
+			for (node n = list_first(lista_param); n; n = list_next(n)) {
+				tSimboloTs *t = list_value(n);
+				t->categoriaTs.p->deslocamento = -4-i;
+				insereTS(t);
+				i++;
+			}
+		  }
+		|
 ;
 
+secao_parametros: secao_parametros PONTO_E_VIRGULA {nParam_local = 0;} lista_param
+				| {nParam_local = 0;} lista_param
+;
+
+lista_param: tem_var lista_id_param DOIS_PONTOS tipo
+		   {
+				int tipo;
+				if (strcmp(token, "integer") == 0)
+					tipo = TS_TIP_INT;
+				atualizaSimboloTS_PF(lista_param, tipo, nParam_local);
+		   }
+;
+
+tem_var: VAR {tem_var = 1;} | {tem_var = 0;}
+;
 
 var         : VAR declara_vars
             |
@@ -167,6 +202,24 @@ lista_id_var: lista_id_var VIRGULA IDENT
         				criaSimboloTS_VS(token, TS_CAT_VS, nivelLexico, totalVar);
         				totalVar++;
 			        }
+;
+
+lista_id_param: lista_id_param VIRGULA IDENT
+              {
+        				nParam++;
+						nParam_local++;
+        				tSimboloTs *t = criaSimboloTS_PF(token, TS_CAT_PF, nivelLexico, TS_PAR_VAL);
+						list_push(t, lista_param);
+						// TODO: when VAR
+			  }
+			  | IDENT
+              {
+        				nParam++;
+						nParam_local++;
+        				tSimboloTs *t = criaSimboloTS_PF(token, TS_CAT_PF, nivelLexico, TS_PAR_VAL);
+						list_push(t, lista_param);
+						// TODO: when VAR
+			  }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -221,6 +274,13 @@ atr_ou_proc: IDENT {sprintf(elementoEsquerda, "%s", token);} atr_ou_proc_cont
 
 atr_ou_proc_cont: ATRIBUICAO expressao
 		   | ABRE_PARENTESES alguma_coisa FECHA_PARENTESES
+			 {
+				tSimboloTs *t = buscaTS(elementoEsquerda);
+				memset(elementoEsquerda, 0, TAM_TOKEN);
+				sprintf(comando, "CHPR %s, %d", t->categoriaTs.c->rotulo, nivelLexico);
+				geraCodigo(NULL, comando);
+				memset(comando, 0, 64);
+			 }
 		   | {
 				tSimboloTs *t = buscaTS(elementoEsquerda);
 				memset(elementoEsquerda, 0, TAM_TOKEN);
@@ -230,7 +290,7 @@ atr_ou_proc_cont: ATRIBUICAO expressao
 			 }
 ;
 
-alguma_coisa:
+alguma_coisa: alguma_coisa VIRGULA e | e
 ;
 
 /*expressao: NUMERO
@@ -266,6 +326,7 @@ avalia_expressao: avalia_expressao AND avalia_expressao {
 		memset(comando, 0, 64);
 	}
 	| ABRE_PARENTESES avalia_expressao FECHA_PARENTESES
+	| NOT ABRE_PARENTESES avalia_expressao FECHA_PARENTESES {geraCodigo(NULL, "NEGA");}
 	| e relacao e {
 		geraCodigo(NULL, simboloEsquerda);
 		memset(simboloEsquerda, 0, 4);
@@ -429,6 +490,7 @@ int main (int argc, char** argv) {
 	TS = criaTS();
 	rotulos = list_new();
 	totalVars = list_new();
+	nParams = list_new();
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);

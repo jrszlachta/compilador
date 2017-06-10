@@ -5,7 +5,7 @@ begin
   m := 5;
   while m > n or p < n and m > p do
   begin
-    while m < 0 do
+    while not(m < 0) do
       o := 1;
     p := m + n * (n)
   end

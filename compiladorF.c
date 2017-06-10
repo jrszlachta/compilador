@@ -77,6 +77,23 @@ tSimboloTs* criaSimboloTS_VS(char *rot, int categoria, int nivel, int deslocamen
   return t;
 }
 
+tSimboloTs* criaSimboloTS_PF(char* rot, int categoria, int nivel, int tipoPassagem)
+{
+ printf("\nTentando criar símbolo com o nome %s e categoria %s\n", rot, catTS(categoria));
+ tSimboloTs* t = (tSimboloTs*)malloc(sizeof(tSimboloTs));
+ if (t)
+ {
+  t->ident = (char*)malloc(sizeof(char)*TAM_TOKEN);
+  strcpy(t->ident, rot);
+  t->categoria = categoria;
+  t->nivel = nivel;
+  t->categoriaTs.p = (tPfTs*)malloc(sizeof(tPfTs));
+  t->categoriaTs.p->tipoPassagem = tipoPassagem;
+ }
+
+ return t;
+}
+
 void atualizaSimboloTS_VS(tSimboloTs* s, int tipo)
 {
  if (s->categoria==TS_CAT_VS)
@@ -86,15 +103,13 @@ void atualizaSimboloTS_VS(tSimboloTs* s, int tipo)
  else printf("Catástrofe detectada:\nTentando atualizar simbolo TS do tipo VS porém a categoria é %d\n\n", s->categoria);
 }
 
-void atualizaSimboloTS_PF(tSimboloTs* s, int deslocamento, int tipoPassagem)
+void atualizaSimboloTS_PF(list l, int tipo, int nparam)
 {
- if (s->categoria==TS_CAT_PF)
- {
-  s->categoriaTs.p = (tPfTs*)malloc(sizeof(tPfTs));
-  s->categoriaTs.p->deslocamento = deslocamento;
-  s->categoriaTs.p->tipoPassagem = tipoPassagem;
- }
- else printf("Catástrofe detectada:\nTentando atualizar simbolo TS do tipo PF porém a categoria é %d\n\n", s->categoria);
+  int i = 0;
+  for(node n = list_first(l); n && i < nparam; n=list_next(n)) {
+    tSimboloTs *s = list_value(n);
+    s->categoriaTs.p->tipo = tipo;
+  }
 }
 
 void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, int* tipoPassagem)
