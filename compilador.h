@@ -16,12 +16,14 @@
 #define TAM_TOKEN 16
 //Categoria da tabela de símbolos: Variável Simples
 #define TS_CAT_VS 0
-//Categoria da tabela de símboloes: Parâmetro Formal
+//Categoria da tabela de símbolos: Parâmetro Formal
 #define TS_CAT_PF 1
 //Categoria da tabela de símbolos: Procedimento
 #define TS_CAT_CP 2
 //Categoria da tabela de símbolos: Função
 #define TS_CAT_CF 3
+//Categoria da tabela de símbolos: Label
+#define TS_CAT_LB 4
 //Tipo Integer
 #define TS_TIP_INT 0
 //Tipo Boolean
@@ -75,6 +77,12 @@ typedef struct cfTs
   tCpTs *p;
 }tCfTs;
 
+//Campos da tabela de símbolos para label
+typedef struct lbTs
+{
+  char *rotulo;
+}tLbTs;
+
 typedef struct simboloTs
 {
  char* ident;
@@ -86,6 +94,7 @@ typedef struct simboloTs
   tPfTs* p;
   tCpTs* c;
   tCfTs* f;
+  tLbTs* l;
  }categoriaTs;
 }tSimboloTs;
 
@@ -120,6 +129,7 @@ void atualizaSimboloTS_VS(tSimboloTs* s, int tipo);
 void atualizaSimboloTS_PF(list l, int tipo, int nParam);
 void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, list tipoPassagem);
 void atualizaSimboloTS_CF(tSimboloTs* s, char* rotulo, int nivel, int nParams, list tipoPassagem, int tipoFunc, int desloc);
+void atualizaSimboloTS_LB(tSimboloTs *s, char *rotulo);
 
 int insereTS(tSimboloTs* s);
 tSimboloTs* buscaTS(char* rot);

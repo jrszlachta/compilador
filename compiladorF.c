@@ -144,6 +144,14 @@ void atualizaSimboloTS_CF(tSimboloTs* s, char* rotulo, int nivel, int nParams, l
  else printf("Catástrofe detectada:\nTentando atualizar simbolo TS do tipo CP porém a categoria é %d\n\n", s->categoria);
 }
 
+void atualizaSimboloTS_LB(tSimboloTs *s, char *rotulo) {
+	if (s->categoria == TS_CAT_LB) {
+		s->categoriaTs.l = (tLbTs *) malloc(sizeof(tLbTs));
+		s->categoriaTs.l->rotulo = (char *) malloc(sizeof(char)*10);
+		strcpy(s->categoriaTs.l->rotulo, rotulo);
+	}
+}
+
 int insereTS(tSimboloTs* s)
 {
  if (s)
@@ -225,8 +233,8 @@ void imprimeSimboloTS(tSimboloTs* t)
      printf(", %d", *aux);
    }
    printf("]\n\n");
-   break;
   }
+  break;
 
   case TS_CAT_CF:
    printf("\nSimbolo TS:\nRot\tCat\tNiv\tRot\tNiv\tnParams\tDesl\tTipo\n%s\t%s\t%d\t%s\t%d\t%d\t%d\t%s\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.f->p->rotulo, t->categoriaTs.f->p->nivel, t->categoriaTs.f->p->nParams, t->categoriaTs.f->v->deslocamento, tipoTS(t->categoriaTs.f->v->tipo));
@@ -241,8 +249,12 @@ void imprimeSimboloTS(tSimboloTs* t)
      printf(", %d", *aux);
    }
    printf("]\n\n");
-   break;
   }
+  break;
+
+  case TS_CAT_LB:
+  	printf("\nSímbolo TS:\nRot\tCat\tNiv\tRot\n%s\t%s\t%d\t%s\n\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.l->rotulo);
+	break;
  }
 }
 
@@ -264,6 +276,10 @@ char *catTS(int categoria)
 
   case TS_CAT_CF:
    return "CF";
+  break;
+
+  case TS_CAT_LB:
+  	return "LB";
   break;
 
   default:

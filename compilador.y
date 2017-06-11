@@ -59,7 +59,8 @@ programa    :{
              }
 ;
 
-bloco       : {totalVar = 0;}
+bloco       : parte_declara_rotulos
+			  {totalVar = 0;}
               parte_declara_vars
 			  {
 				int *aux = (int *) malloc(sizeof(int));
@@ -81,15 +82,36 @@ bloco       : {totalVar = 0;}
               comando_composto
       			  {
 						int *aux = (int *) list_value(list_pop(totalVars));
-        				sprintf(comando, "DMEM %d", *aux);
-        				geraCodigo (NULL, comando);
-        				memset(comando, 0, 64);
+						if (*aux > 0) {
+        					sprintf(comando, "DMEM %d", *aux);
+        					geraCodigo (NULL, comando);
+        					memset(comando, 0, 64);
+						}
 						free(aux);
       			  }
               ;
 
 
+parte_declara_rotulos: parte_declara_rotulos declara_rotulo
+					 | declara_rotulo
+					 |
+;
 
+declara_rotulo: LABEL list_id_rotulo PONTO_E_VIRGULA;
+
+list_id_rotulo: list_id_rotulo VIRGULA NUMERO
+			  {
+				char *r0 = geraRotulo();
+				tSimboloTs *t = criaSimboloTS(token, TS_CAT_LB, nivelLexico);
+				atualizaSimboloTS_LB(t, r0);
+			  }
+			  | NUMERO
+			  {
+				char *r0 = geraRotulo();
+				tSimboloTs *t = criaSimboloTS(token, TS_CAT_LB, nivelLexico);
+				atualizaSimboloTS_LB(t, r0);
+			  }
+;
 
 parte_declara_vars:  var
 ;
@@ -118,12 +140,15 @@ declara_procedimento: PROCEDURE IDENT
 	{
 		char *r0 = (char *) list_value(list_pop(rotulos));
 		int *tipo;
-		list tipoParams = list_new();
-		for (node n = list_first(lista_param); n; n = list_next(n)) {
-			tipo = (int *) malloc(sizeof(int));
-			tSimboloTs *t = list_value(n);
-			*tipo = t->categoriaTs.p->tipoPassagem;
-			list_push(tipo, tipoParams);
+		list tipoParams = NULL;
+		if (nParam) {
+			tipoParams = list_new();
+			for (node n = list_first(lista_param); n; n = list_next(n)) {
+				tipo = (int *) malloc(sizeof(int));
+				tSimboloTs *t = list_value(n);
+				*tipo = t->categoriaTs.p->tipoPassagem;
+				list_push(tipo, tipoParams);
+			}
 		}
 		tSimboloTs *t = list_value(list_first(fupr));
 		atualizaSimboloTS_CP(t, r0, nivelLexico, nParam, tipoParams);
@@ -311,13 +336,30 @@ comandos: comandos PONTO_E_VIRGULA comando
 comando: numero comando_sem_rotulo
 ;
 
-numero: NUMERO DOIS_PONTOS |
+numero: NUMERO
+	    {
+			sprintf(elementoEsquerda, "%s", token);
+		}
+	    DOIS_PONTOS
+	 	{
+			tSimboloTs *s = buscaTS(elementoEsquerda);
+			memset(elementoEsquerda, 0, TAM_TOKEN);
+			tSimboloTs *t = list_value(list_first(fupr));
+			int i, *nvl;
+			nvl = list_value(list_first(totalVars));
+			sprintf(comando, "ENRT %d, %d", nivelLexico, *nvl);
+			geraCodigo(s->categoriaTs.l->rotulo, comando);
+			memset(comando, 0, 64);
+		} |
 ;
 
-comando_sem_rotulo: atr_ou_proc | comando_repetitivo | comando_condicional | leitura | escrita
+comando_sem_rotulo: atr_ou_proc | comando_repetitivo | comando_condicional | comando_6070 | leitura | escrita
 ;
 
-leitura: READ ABRE_PARENTESES IDENT
+leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES
+;
+
+lista_read: lista_read VIRGULA IDENT
 	{
 		geraCodigo(NULL, "LEIT");
 		tSimboloTs *s = buscaTS(token);
@@ -329,7 +371,18 @@ leitura: READ ABRE_PARENTESES IDENT
 		memset(comando, 0, 64);
 		memset(elementoEsquerda, 0, TAM_TOKEN);
 	}
-	FECHA_PARENTESES
+	| IDENT
+	{
+		geraCodigo(NULL, "LEIT");
+		tSimboloTs *s = buscaTS(token);
+		if (s->categoria == TS_CAT_VS || (s->categoria == TS_CAT_PF && s->categoriaTs.p->tipoPassagem == TS_PAR_VAL))
+			sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		else if (s->categoria == TS_CAT_PF && s->categoriaTs.p->tipoPassagem == TS_PAR_REF)
+			sprintf(comando, "ARMI %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+		memset(elementoEsquerda, 0, TAM_TOKEN);
+	}
 ;
 
 escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
@@ -530,6 +583,18 @@ chamada_func: variavel
 				geraCodigo(NULL, comando);
 				memset(comando, 0, 64);
 				ch_proc = 0;
+			 }
+;
+
+comando_6070: GOTO NUMERO {
+				tSimboloTs *t = buscaTS(token);
+				tSimboloTs *s = list_value(list_first(fupr));
+				if (s)
+					sprintf(comando, "DSVR %s, %d, %d", t->categoriaTs.l->rotulo, t->nivel, s->nivel);
+				else
+					sprintf(comando, "DSVR %s, %d, %d", t->categoriaTs.l->rotulo, t->nivel, 0);
+				geraCodigo(NULL, comando);
+				memset(comando, 0, 64);
 			 }
 ;
 
