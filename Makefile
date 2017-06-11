@@ -13,7 +13,7 @@ y.tab.c: compilador.y compilador.h
 	bison compilador.y -d -v
 
 compilador.o : compilador.h compiladorF.c list.o
-	gcc -c compiladorF.c list.o -o compilador.o
+	gcc -g -c compiladorF.c list.o -o compilador.o
 
 graph:
 	bison compilador.y -g

@@ -225,12 +225,12 @@ void imprimeSimboloTS(tSimboloTs* t)
      printf(", %d", *aux);
    }
    printf("]\n\n");
+   break;
   }
 
   case TS_CAT_CF:
-   printf("\nSimbolo CF:\nRot\tCat\tNiv\tRot\tNiv\tnParams\n%s\t%s\t%d\t%s\t%d\t%d\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.f->p->rotulo, t->categoriaTs.f->p->nivel, t->categoriaTs.f->p->nParams);
-   printf("Simbolo VS:\nRot\tCat\tNiv\tDesl\tTipo\n%s\t%s\t%d\t%d\t%s\n\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.f->v->deslocamento, tipoTS(t->categoriaTs.f->v->tipo));
-   if (t->categoriaTs.c->tipoPassagem!=NULL)
+   printf("\nSimbolo TS:\nRot\tCat\tNiv\tRot\tNiv\tnParams\tDesl\tTipo\n%s\t%s\t%d\t%s\t%d\t%d\t%d\t%s\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.f->p->rotulo, t->categoriaTs.f->p->nivel, t->categoriaTs.f->p->nParams, t->categoriaTs.f->v->deslocamento, tipoTS(t->categoriaTs.f->v->tipo));
+   if (t->categoriaTs.f->p->tipoPassagem!=NULL)
    {
 	node n = list_first(t->categoriaTs.f->p->tipoPassagem);
 	int *aux = (int*) list_value(n);
@@ -241,8 +241,8 @@ void imprimeSimboloTS(tSimboloTs* t)
      printf(", %d", *aux);
    }
    printf("]\n\n");
+   break;
   }
-  break;
  }
 }
 
