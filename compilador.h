@@ -16,10 +16,14 @@
 #define TAM_TOKEN 16
 //Categoria da tabela de símbolos: Variável Simples
 #define TS_CAT_VS 0
-//Categoria da tabela de símboloes: Parâmetro Formal
+//Categoria da tabela de símbolos: Parâmetro Formal
 #define TS_CAT_PF 1
 //Categoria da tabela de símbolos: Procedimento
 #define TS_CAT_CP 2
+//Categoria da tabela de símbolos: Função
+#define TS_CAT_CF 3
+//Categoria da tabela de símbolos: Label
+#define TS_CAT_LB 4
 //Tipo Integer
 #define TS_TIP_INT 0
 //Tipo Boolean
@@ -39,7 +43,7 @@ typedef enum simbolos {
   simb_else, simb_while, simb_do, simb_or, simb_and, simb_not,
   simb_mais, simb_menos, simb_asterisco, simb_div, simb_igual,
   simb_maior, simb_menor, simb_maior_igual, simb_menor_igual,
-  simb_diferente, simb_integer
+  simb_diferente, simb_integer, simb_read, simb_write
 } simbolos;
 
 //Campos da tabela de símbolos para variáveis simples
@@ -54,6 +58,7 @@ typedef struct pfTs
 {
  int deslocamento;
  int tipoPassagem;
+ int tipo;
 }tPfTs;
 
 //Campos da tabela de símbolos para chamada de procedimentos
@@ -62,8 +67,21 @@ typedef struct cpTs
  char* rotulo;
  int nivel;
  int nParams;
- int* tipoPassagem;
+ list tipoPassagem;
 }tCpTs;
+
+//Campos da tabela de símbolos para chamada de função
+typedef struct cfTs
+{
+  tVsTs *v;
+  tCpTs *p;
+}tCfTs;
+
+//Campos da tabela de símbolos para label
+typedef struct lbTs
+{
+  char *rotulo;
+}tLbTs;
 
 typedef struct simboloTs
 {
@@ -75,6 +93,8 @@ typedef struct simboloTs
   tVsTs* v;
   tPfTs* p;
   tCpTs* c;
+  tCfTs* f;
+  tLbTs* l;
  }categoriaTs;
 }tSimboloTs;
 
@@ -103,10 +123,13 @@ list criaTS();
 void imprimeSimboloTS(tSimboloTs* t);
 tSimboloTs* criaSimboloTS(char* rot, int categoria, int nivel);
 tSimboloTs* criaSimboloTS_VS(char *rot, int categoria, int nivel, int deslocamento);
+tSimboloTs* criaSimboloTS_PF(char *rot, int categoria, int nivel, int tipoPassagem);
 
 void atualizaSimboloTS_VS(tSimboloTs* s, int tipo);
-void atualizaSimboloTS_PF(tSimboloTs* s, int deslocamento, int tipoPassagem);
-void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, int* tipoPassagem);
+void atualizaSimboloTS_PF(list l, int tipo, int nParam);
+void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, list tipoPassagem);
+void atualizaSimboloTS_CF(tSimboloTs* s, char* rotulo, int nivel, int nParams, list tipoPassagem, int tipoFunc, int desloc);
+void atualizaSimboloTS_LB(tSimboloTs *s, char *rotulo);
 
 int insereTS(tSimboloTs* s);
 tSimboloTs* buscaTS(char* rot);
