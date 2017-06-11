@@ -98,7 +98,6 @@ parte_declara_subrotinas: parte_declara_subrotinas declara_procedimento
 						| parte_declara_subrotinas declara_funcao
 						| declara_procedimento
 						| declara_funcao
-						|
 ;
 
 declara_procedimento: PROCEDURE IDENT
@@ -156,61 +155,61 @@ declara_procedimento: PROCEDURE IDENT
 ;
 
 declara_funcao: FUNCTION IDENT
-    {
-        nParam = 0;
-        nivelLexico++;
-        lista_param = list_new();
-        char *r0 = geraRotulo();
-        list_push(r0, rotulos);
-        sprintf(comando, "ENPR %d", nivelLexico);
-        geraCodigo(r0, comando);
-        memset(comando, 0, 64);
-        tSimboloTs* t = criaSimboloTS(token, TS_CAT_CF, nivelLexico);
-        list_push(t, fupr);
-    }
-    parametros
-    DOIS_PONTOS tipo
-    {
-        int tipoFunc;
-        if (token == "integer")
-            tipoFunc = TS_TIP_INT;
-        char *r0 = (char *) list_value(list_pop(rotulos));
-        int *tipo;
-        list tipoParams = list_new();
-        for (node n = list_first(lista_param); n; n = list_next(n)) {
-            tipo = (int *) malloc(sizeof(int));
-            tSimboloTs *t = list_value(n);
-            *tipo = t->categoriaTs.p->tipoPassagem;
-            list_push(tipo, tipoParams);
-        }
-        tSimboloTs *t = list_value(list_first(fupr));
-        atualizaSimboloTS_CF(t, r0, nivelLexico, nParam, tipoParams, tipoFunc, -4-nParam);
-        free(r0);
-        int *aux = (int *) malloc(sizeof(int));
-        *aux = nParam;
-        list_push(aux, nParams);
-    }
+	{
+		nParam = 0;
+		nivelLexico++;
+		lista_param = list_new();
+		char *r0 = geraRotulo();
+		list_push(r0, rotulos);
+		sprintf(comando, "ENPR %d", nivelLexico);
+		geraCodigo(r0, comando);
+		memset(comando, 0, 64);
+		tSimboloTs* t = criaSimboloTS(token, TS_CAT_CF, nivelLexico);
+		list_push(t, fupr);
+	}
+	parametros
+	DOIS_PONTOS tipo
+	{
+		int tipoFunc;
+		if (token == "integer")
+			tipoFunc = TS_TIP_INT;
+		char *r0 = (char *) list_value(list_pop(rotulos));
+		int *tipo;
+		list tipoParams = list_new();
+		for (node n = list_first(lista_param); n; n = list_next(n)) {
+			tipo = (int *) malloc(sizeof(int));
+			tSimboloTs *t = list_value(n);
+			*tipo = t->categoriaTs.p->tipoPassagem;
+			list_push(tipo, tipoParams);
+		}
+		tSimboloTs *t = list_value(list_first(fupr));
+		atualizaSimboloTS_CP(t, r0, nivelLexico, nParam, tipoParams, tipoFunc, -4+nParam);
+		free(r0);
+		int *aux = (int *) malloc(sizeof(int));
+		*aux = nParam;
+		list_push(aux, nParams);
+	}
 	PONTO_E_VIRGULA
 	bloco
-    {
-        int *aux = (int *) list_value(list_pop(nParams));
-        sprintf(comando, "RTPR %d, %d", nivelLexico, *aux);
-        geraCodigo(NULL, comando);
-        memset(comando, 0, 64);
-        nivelLexico--;
-    }
-    PONTO_E_VIRGULA
-    {
-        list_free(lista_param, NULL);
-        tSimboloTs *t = list_value(list_pop(fupr));
-        node n;
-        n = list_first(TS);
-        tSimboloTs *s = list_value(n);
-        for(n = list_first(TS); n && t != s; n = list_next(n)) {
-            list_pop(TS);
-            s = list_value(list_next(n));
-        }
-    }
+	{
+		int *aux = (int *) list_value(list_pop(nParams));
+		sprintf(comando, "RTPR %d, %d", nivelLexico, *aux);
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+		nivelLexico--;
+	}
+	PONTO_E_VIRGULA
+	{
+		list_free(lista_param, NULL);
+		tSimboloTs *t = list_value(list_pop(fupr));
+		node n;
+		n = list_first(TS);
+		tSimboloTs *s = list_value(n);
+		for(n = list_first(TS); n && t != s; n = list_next(n)) {
+			list_pop(TS);
+			s = list_value(list_next(n));
+		}
+	}
 ;
 
 parametros: ABRE_PARENTESES secao_parametros FECHA_PARENTESES
@@ -349,10 +348,7 @@ atr_ou_proc: IDENT {sprintf(elementoEsquerda, "%s", token);} atr_ou_proc_cont
 ;
 
 atr_ou_proc_cont: ATRIBUICAO expressao
-			| chamada_proc
-;
-
-chamada_proc: ABRE_PARENTESES
+		   | ABRE_PARENTESES
 			 {ch_proc = 1; nParam_chamada = 0;
 			  tSimboloTs *t = buscaTS(elementoEsquerda);
 			  tAtual = t;
@@ -378,70 +374,6 @@ chamada_proc: ABRE_PARENTESES
 				geraCodigo(NULL, comando);
 				memset(comando, 0, 64);
 			 }
-;
-
-chamada_func: ABRE_PARENTESES
-			 {ch_proc = 1; nParam_chamada = 0;
-			  tSimboloTs *t = buscaTS(elementoEsquerda);
-			  tAtual = t;
-			  if (t->categoria == TS_CAT_CF)
-				geraCodigo(NULL, "AMEM 1");
-			 }
-			 alguma_coisa FECHA_PARENTESES
-			 {
-			  	tSimboloTs *t = buscaTS(elementoEsquerda);
-				memset(elementoEsquerda, 0, TAM_TOKEN);
-				sprintf(comando, "CHPR %s, %d", t->categoriaTs.c->rotulo, nivelLexico);
-				geraCodigo(NULL, comando);
-				memset(comando, 0, 64);
-				ch_proc = 0;
-			 }
-		   |
-	{
-		tSimboloTs *s = buscaTS(token);
-		if (s && s->categoria == TS_CAT_CF) {
-			tSimboloTs *t = buscaTS(elementoEsquerda);
-			tAtual = t;
-			if (t->categoria == TS_CAT_CF)
-			  geraCodigo(NULL, "AMEM 1");
-			memset(elementoEsquerda, 0, TAM_TOKEN);
-			sprintf(comando, "CHPR %s, %d", t->categoriaTs.c->rotulo, nivelLexico);
-			geraCodigo(NULL, comando);
-			memset(comando, 0, 64);
-		} else {
-			int *tp;
-			if(ch_proc) {
-				int i = 0; node n;
-				for(n = list_first(tAtual->categoriaTs.c->tipoPassagem); n && i < nParam_chamada; n = list_next(n)){
-					i++;
-				}
-				tp = (int *) list_value(n);
-			}
-			if (s->categoria == TS_CAT_VS) {
-				if (ch_proc && *tp == TS_PAR_REF)
-					sprintf(comando, "CREN %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-				else
-					sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-			}
-			else if (s->categoria == TS_CAT_PF) {
-				if (s->categoriaTs.p->tipoPassagem == TS_PAR_VAL) {
-					if (ch_proc && *tp == TS_PAR_REF)
-						sprintf(comando, "CREN %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-					else
-						sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-				}
-				else if (s->categoriaTs.p->tipoPassagem == TS_PAR_REF) {
-					if (ch_proc && *tp == TS_PAR_REF)
-						sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-					else
-						sprintf(comando, "CRVI %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-				}
-			}
-			geraCodigo(NULL, comando);
-			memset(comando, 0, 64);
-		}
- 	}
-
 ;
 
 alguma_coisa: alguma_coisa VIRGULA e {nParam_chamada++;} | e {nParam_chamada++;}
@@ -527,16 +459,45 @@ f: f ASTERISCO t {
  | t
 ;
 
-t: IDENT chamada_func
+t: IDENT {
+		tSimboloTs *s = buscaTS(token);
+		int *tp;
+		if(ch_proc) {
+			int i = 0; node n;
+			for(n = list_first(tAtual->categoriaTs.c->tipoPassagem); n && i < nParam_chamada; n = list_next(n)){
+				i++;
+			}
+			tp = (int *) list_value(n);
+		}
+		if (s->categoria == TS_CAT_VS) {
+			if (ch_proc && *tp == TS_PAR_REF)
+				sprintf(comando, "CREN %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+			else
+				sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+		}
+		else if (s->categoria == TS_CAT_PF) {
+			if (s->categoriaTs.p->tipoPassagem == TS_PAR_VAL) {
+				if (ch_proc && *tp == TS_PAR_REF)
+					sprintf(comando, "CREN %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+				else
+					sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+			}
+			else if (s->categoriaTs.p->tipoPassagem == TS_PAR_REF) {
+				if (ch_proc && *tp == TS_PAR_REF)
+					sprintf(comando, "CRVL %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+				else
+					sprintf(comando, "CRVI %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
+			}
+		}
+		geraCodigo(NULL, comando);
+		memset(comando, 0, 64);
+ 	}
  | NUMERO {
 		sprintf(comando, "CRCT %s", token);
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
 	}
  | ABRE_PARENTESES e FECHA_PARENTESES
- | chamada_proc
-;
-
 ;
 
 comando_repetitivo: WHILE

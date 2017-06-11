@@ -126,6 +126,24 @@ void atualizaSimboloTS_CP(tSimboloTs* s, char* rotulo, int nivel, int nParams, l
  else printf("Catástrofe detectada:\nTentando atualizar simbolo TS do tipo CP porém a categoria é %d\n\n", s->categoria);
 }
 
+void atualizaSimboloTS_CF(tSimboloTs* s, char* rotulo, int nivel, int nParams, list tipoPassagem, int tipoFunc, int desloc)
+{
+ if (s->categoria==TS_CAT_CF)
+ {
+  s->categoriaTs.f = (tCfTs*)malloc(sizeof(tCfTs));
+  s->categoriaTs.f->p = (tCpTs*)malloc(sizeof(tCpTs));
+  s->categoriaTs.f->v = (tVsTs*)malloc(sizeof(tVsTs));
+  s->categoriaTs.f->p->rotulo = (char *) malloc(sizeof(char)*10);
+  strcpy(s->categoriaTs.f->p->rotulo, rotulo);
+  s->categoriaTs.f->p->nivel = nivel;
+  s->categoriaTs.f->p->nParams = nParams;
+  s->categoriaTs.f->p->tipoPassagem = tipoPassagem;
+  s->categoriaTs.f->v->tipo = tipoFunc;
+  s->categoriaTs.f->v->deslocamento = desloc;
+ }
+ else printf("Catástrofe detectada:\nTentando atualizar simbolo TS do tipo CP porém a categoria é %d\n\n", s->categoria);
+}
+
 int insereTS(tSimboloTs* s)
 {
  if (s)
@@ -191,7 +209,7 @@ void imprimeSimboloTS(tSimboloTs* t)
   break;
 
   case TS_CAT_PF:
-   printf("\nSimbolo TS:\nRot\tCat\tNiv\tDesl\tTipo\n%s\t%s\t%d\t%d\t%s\n\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.p->deslocamento, tipoPassagemTS(t->categoriaTs.p->tipoPassagem));
+   printf("\nSimbolo TS:\nRot\tCat\tNiv\tDesl\tTipo\tPor\n%s\t%s\t%d\t%d\t%s\t%s\n\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.p->deslocamento, tipoTS(t->categoriaTs.p->tipo), tipoPassagemTS(t->categoriaTs.p->tipoPassagem));
   break;
 
   case TS_CAT_CP:
@@ -207,8 +225,24 @@ void imprimeSimboloTS(tSimboloTs* t)
      printf(", %d", *aux);
    }
    printf("]\n\n");
-  break;
   }
+
+  case TS_CAT_CF:
+   printf("\nSimbolo CF:\nRot\tCat\tNiv\tRot\tNiv\tnParams\n%s\t%s\t%d\t%s\t%d\t%d\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.f->p->rotulo, t->categoriaTs.f->p->nivel, t->categoriaTs.f->p->nParams);
+   printf("Simbolo VS:\nRot\tCat\tNiv\tDesl\tTipo\n%s\t%s\t%d\t%d\t%s\n\n", t->ident, catTS(t->categoria), t->nivel, t->categoriaTs.f->v->deslocamento, tipoTS(t->categoriaTs.f->v->tipo));
+   if (t->categoriaTs.c->tipoPassagem!=NULL)
+   {
+	node n = list_first(t->categoriaTs.f->p->tipoPassagem);
+	int *aux = (int*) list_value(n);
+    printf("Tipos Passagem: [%d", *aux);
+	n = list_next(n);
+    for (; n; n = list_next(n)) {
+	 aux = (int *) list_value(n);
+     printf(", %d", *aux);
+   }
+   printf("]\n\n");
+  }
+  break;
  }
 }
 
@@ -226,6 +260,10 @@ char *catTS(int categoria)
 
   case TS_CAT_PF:
    return "PF";
+  break;
+
+  case TS_CAT_CF:
+   return "CF";
   break;
 
   default:
