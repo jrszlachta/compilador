@@ -1,2 +1,0 @@
-#!/bin/bash
-NEX="$1" && ./compilador PgmasTeste/Exemplo8.12/pgma.pas && vimdiff MEPA PgmasTeste/Exemplo8.12/MEPA

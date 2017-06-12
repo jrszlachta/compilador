@@ -28,6 +28,8 @@
 #define TS_TIP_INT 0
 //Tipo Boolean
 #define TS_TIP_BOO 1
+//Tipo Imaginarium
+#define TS_TIP_IMG 2
 //Tipo de passagem de parâmetro: Valor
 #define TS_PAR_VAL 0
 //Tipo de passagem de parâmetro: Referência
@@ -43,7 +45,8 @@ typedef enum simbolos {
   simb_else, simb_while, simb_do, simb_or, simb_and, simb_not,
   simb_mais, simb_menos, simb_asterisco, simb_div, simb_igual,
   simb_maior, simb_menor, simb_maior_igual, simb_menor_igual,
-  simb_diferente, simb_integer, simb_read, simb_write
+  simb_diferente, simb_integer, simb_read, simb_write, simb_imaginarium,
+  simb_numeroi
 } simbolos;
 
 //Campos da tabela de símbolos para variáveis simples

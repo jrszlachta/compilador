@@ -27,6 +27,7 @@ list rotulos;
 list totalVars;
 list nParams, lista_param;
 list fupr;
+list tipoExp;
 
 %}
 
@@ -37,7 +38,7 @@ list fupr;
 %token GOTO IF THEN WHILE DO NOT
 %token IGUAL MAIOR MENOR MAIS MENOS ASTERISCO DIV
 %token MAIOR_IGUAL MENOR_IGUAL DIFERENTE INTEGER
-%token READ WRITE
+%token READ WRITE IMAGINARIO NUMERO_I
 
 %left OR
 %left AND
@@ -197,8 +198,10 @@ declara_funcao: FUNCTION IDENT
     DOIS_PONTOS tipo
     {
         int tipoFunc;
-        if (token == "integer")
+        if (strcmp(token, "integer")==0)
             tipoFunc = TS_TIP_INT;
+		else if(strcmp(token, "imaginario")== 0)
+			tipoFunc = TS_TIP_IMG;
         char *r0 = (char *) list_value(list_pop(rotulos));
         int *tipo;
         list tipoParams = list_new();
@@ -260,7 +263,10 @@ lista_param: tem_var lista_id_param DOIS_PONTOS tipo
 				int tipo;
 				if (strcmp(token, "integer") == 0)
 					tipo = TS_TIP_INT;
+				else if(strcmp(token, "imaginario")== 0)
+					tipo = TS_TIP_IMG;
 				atualizaSimboloTS_PF(lista_param, tipo, nParam_local);
+				tipo_param = 0;
 		   }
 ;
 
@@ -287,7 +293,7 @@ declara_var : { contVar = 0; }
               }
 ;
 
-tipo        : INTEGER
+tipo        : INTEGER | IMAGINARIO
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT
@@ -416,6 +422,10 @@ chamada_proc: ABRE_PARENTESES
 			 {
 			  	tSimboloTs *t = buscaTS(elementoEsquerda);
 				memset(elementoEsquerda, 0, TAM_TOKEN);
+				int i = t->categoriaTs.c->nParams;
+				for(;i > 0;i--){
+					list_pop(tipoExp);
+				}
 				sprintf(comando, "CHPR %s, %d", t->categoriaTs.c->rotulo, nivelLexico);
 				geraCodigo(NULL, comando);
 				memset(comando, 0, 64);
@@ -438,12 +448,35 @@ alguma_coisa: alguma_coisa VIRGULA e {nParam_chamada++;} | e {nParam_chamada++;}
 
 expressao: e {
 		tSimboloTs *s = buscaTS(elementoEsquerda);
-		if (s->categoria == TS_CAT_VS || (s->categoria == TS_CAT_PF && s->categoriaTs.p->tipoPassagem == TS_PAR_VAL))
+		int *d = list_value(list_pop(tipoExp));
+		if (s->categoria == TS_CAT_VS){
+			if(s->categoriaTs.v->tipo != *d){
+				printf("Erro de atribuicao\n");
+				exit(0);
+			}
 			sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-		else if (s->categoria == TS_CAT_PF && s->categoriaTs.p->tipoPassagem == TS_PAR_REF)
+		}
+		else if (s->categoria == TS_CAT_PF && s->categoriaTs.p->tipoPassagem == TS_PAR_VAL){
+			if(s->categoriaTs.p->tipo != *d){
+				printf("Erro de atribuicao\n");
+				exit(0);
+			}
+			sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.p->deslocamento);
+		}
+		else if (s->categoria == TS_CAT_PF && s->categoriaTs.p->tipoPassagem == TS_PAR_REF){
+			if(s->categoriaTs.p->tipo != *d){
+				printf("Erro de atribuicao\n");
+				exit(0);
+			}
 			sprintf(comando, "ARMI %d, %d", s->nivel, s->categoriaTs.v->deslocamento);
-		else if (s->categoria == TS_CAT_CF)
+		}
+		else if (s->categoria == TS_CAT_CF){
+			if(s->categoriaTs.f->v->tipo != *d){
+				printf("Erro de atribuicao\n");
+				exit(0);
+			}
 			sprintf(comando, "ARMZ %d, %d", s->nivel, s->categoriaTs.f->v->deslocamento);
+		}
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
 		memset(elementoEsquerda, 0, TAM_TOKEN);
@@ -463,6 +496,13 @@ avalia_expressao: avalia_expressao AND avalia_expressao {
 	| ABRE_PARENTESES avalia_expressao FECHA_PARENTESES
 	| NOT ABRE_PARENTESES avalia_expressao FECHA_PARENTESES {geraCodigo(NULL, "NEGA");}
 	| e relacao e {
+		int* e, *d;
+		d = list_value(list_pop(tipoExp));
+		e = list_value(list_pop(tipoExp));
+		if(*d != *e){
+			printf("Erro de comparacao\n");
+			exit(0);
+		}
 		geraCodigo(NULL, simboloEsquerda);
 		memset(simboloEsquerda, 0, 4);
 	}
@@ -478,11 +518,31 @@ relacao: IGUAL {sprintf(simboloEsquerda, "CMIG");}
 ;
 
 e: e MAIS f {
+		int* e, *d, *r;
+		d = list_value(list_pop(tipoExp));
+		e = list_value(list_pop(tipoExp));
+		if(*d != *e){
+			printf("Erro de tipos\n");
+			exit(0);
+		}
+		r = malloc(sizeof(int));
+		*r = *d;
+		list_push(r,tipoExp);
 		sprintf(comando, "SOMA");
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
     }
  | e MENOS f {
+		int* e, *d, *r;
+		d = list_value(list_pop(tipoExp));
+		e = list_value(list_pop(tipoExp));
+		if(*d != *e){
+			printf("Erro de tipos\n");
+			exit(0);
+		}
+		r = malloc(sizeof(int));
+		*r = *d;
+		list_push(r,tipoExp);
 		sprintf(comando, "SUBT");
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
@@ -491,11 +551,31 @@ e: e MAIS f {
 ;
 
 f: f ASTERISCO t {
+		int* e, *d, *r;
+		d = list_value(list_pop(tipoExp));
+		e = list_value(list_pop(tipoExp));
+		if(*d != *e){
+			printf("Erro de tipos\n");
+			exit(0);
+		}
+		r = malloc(sizeof(int));
+		*r = TS_TIP_INT;
+		list_push(r,tipoExp);
 		sprintf(comando, "MULT");
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
 	}
  | f DIV t {
+		int* e, *d, *r;
+		d = list_value(list_pop(tipoExp));
+		e = list_value(list_pop(tipoExp));
+		if(*d != *e){
+			printf("Erro de tipos\n");
+			exit(0);
+		}
+		r = malloc(sizeof(int));
+		*r = TS_TIP_INT;
+		list_push(r,tipoExp);
 		sprintf(comando, "DIVI");
 		geraCodigo(NULL, comando);
 		memset(comando, 0, 64);
@@ -504,13 +584,33 @@ f: f ASTERISCO t {
 ;
 
 t: variavel
- | NUMERO {
-		sprintf(comando, "CRCT %s", token);
-		geraCodigo(NULL, comando);
-		memset(comando, 0, 64);
-	}
+ | qual_numero
  | ABRE_PARENTESES e FECHA_PARENTESES
  | chamada_func
+;
+
+qual_numero:NUMERO
+			{
+				sprintf(comando, "CRCT %s", token);
+				geraCodigo(NULL, comando);
+				memset(comando, 0, 64);
+				int *tipo = malloc(sizeof(int));
+				*tipo = TS_TIP_INT;
+				list_push(tipo,tipoExp);
+			}
+		   | NUMERO_I
+			{
+				int i;
+				for(i = 0; i < TAM_TOKEN; i++)
+					if (token[i] = 'i')
+						token[i] = '\0';
+				sprintf(comando, "CRCT %s", token);
+				geraCodigo(NULL, comando);
+				memset(comando, 0, 64);
+				int *tipo = malloc(sizeof(int));
+				*tipo = TS_TIP_IMG;
+				list_push(tipo,tipoExp);
+			}
 ;
 
 variavel: IDENT
@@ -518,6 +618,9 @@ variavel: IDENT
 		tSimboloTs *s = buscaTS(token);
 		if (s && s->categoria == TS_CAT_CF) {
 			tAtual = buscaTS(token);
+			int *tipo = malloc(sizeof(int));
+			*tipo = s->categoriaTs.f->v->tipo;
+			list_push(tipo,tipoExp);
 			/*tSimboloTs *t = buscaTS(elementoEsquerda);
 			tAtual = t;
 			if (t->categoria == TS_CAT_CF)
@@ -527,7 +630,15 @@ variavel: IDENT
 			geraCodigo(NULL, comando);
 			memset(comando, 0, 64);*/
 		} else if (s) {
-		int *tp;
+			int *tp;
+			int *tipo = malloc(sizeof(int));
+			//if(!ch_proc){
+				if(s->categoria == TS_CAT_VS)
+					*tipo = s->categoriaTs.v->tipo;
+				else if(s->categoria == TS_CAT_PF)
+					*tipo = s->categoriaTs.p->tipo;
+				list_push(tipo,tipoExp);
+			//}
 		if(ch_proc) {
 			int i = 0; node n;
 			if (ch_proc == 1)
@@ -570,8 +681,12 @@ chamada_func: variavel
 			 {ch_proc = 2; nParam_chamada = 0;
 			  //tSimboloTs *t = buscaTS(elementoEsquerda);
 			  //tAtual = t;
-			  if (tAtual->categoria == TS_CAT_CF)
+			  if (tAtual->categoria == TS_CAT_CF){
 				geraCodigo(NULL, "AMEM 1");
+				/*int *r = malloc(sizeof(int));
+				*r = tAtual->categoriaTs.f->v->tipo;
+				list_push(r,tipoExp);*/
+			  }
 			 }
 			 ABRE_PARENTESES
 			 alguma_coisa
@@ -579,6 +694,10 @@ chamada_func: variavel
 			 {
 			  	//tSimboloTs *t = buscaTS(elementoEsquerda);
 				//memset(elementoEsquerda, 0, TAM_TOKEN);
+				int i = tAtual->categoriaTs.f->p->nParams;
+				for(;i > 0;i--){
+					list_pop(tipoExp);
+				}
 				sprintf(comando, "CHPR %s, %d", tAtual->categoriaTs.f->p->rotulo, nivelLexico);
 				geraCodigo(NULL, comando);
 				memset(comando, 0, 64);
@@ -708,6 +827,7 @@ int main (int argc, char** argv) {
 	totalVars = list_new();
 	nParams = list_new();
 	fupr = list_new();
+	tipoExp = list_new();
  	for (node n=list_first(TS); n; n=list_next(n))
  	{
   		tSimboloTs* t = list_value(n);
