@@ -20,6 +20,8 @@ descarte [\t ]+
 
 numero [0-9]+
 
+numero_i [0-9]+[i]
+
 comentario "(*".*"*)"
 
 ident [a-zAZ][a-zAZ1-9]*
@@ -129,6 +131,13 @@ integer { simbolo = simb_integer;
 		  IMPRIME(" integer ");
 		  return INTEGER;
 		}
+
+imaginario {
+			simbolo = simb_imaginarium;
+			strncpy(token, yytext, TAM_TOKEN);
+			IMPRIME(" imaginario ");
+			return IMAGINARIO;
+	       }
 
 array { simbolo = simb_array;
 		strncpy(token, yytext, TAM_TOKEN);
@@ -261,6 +270,12 @@ div { simbolo = simb_div;
 		IMPRIME(" diferente ");
 		return DIFERENTE;
 	}
+
+{numero_i} { simbolo = simb_numeroi;
+		   strncpy(token, yytext, TAM_TOKEN);
+		   IMPRIME(" numero_i ");
+		   return NUMERO_I;
+		}
 
 {numero} { simbolo = simb_numero;
 		   strncpy(token, yytext, TAM_TOKEN);

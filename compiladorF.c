@@ -187,6 +187,8 @@ void atualizaTS(int num, char token[TAM_TOKEN])
      atualizaSimboloTS_VS(t, TS_TIP_INT);
     else if (strcmp(token, "boolean")==0)
      atualizaSimboloTS_VS(t, TS_TIP_BOO);
+	else if (strcmp(token, "imaginario")==0)
+	 atualizaSimboloTS_VS(t, TS_TIP_IMG);
     i++;
    }
   }
@@ -298,6 +300,10 @@ char *tipoTS(int tipo)
 
   case TS_TIP_BOO:
    return "BOOLEAN";
+  break;
+
+  case TS_TIP_IMG:
+   return "IMAGINARIO";
   break;
 
   default:
